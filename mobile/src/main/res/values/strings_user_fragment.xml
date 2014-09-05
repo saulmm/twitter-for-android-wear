@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="connected_wearable_message">Wearable connected, you can check your timeline from your wear device</string>
+    <string name="disconnected_wearable">Could not find any wearable device</string>
+</resources>

@@ -1,0 +1,32 @@
+apply plugin: 'com.android.application'
+
+android {
+    compileSdkVersion 20
+    buildToolsVersion "20.0.0"
+
+    defaultConfig {
+        applicationId "com.saulmm.tweetwear"
+        minSdkVersion 18
+        targetSdkVersion 20
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            runProguard false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+dependencies {
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+    wearApp project(':wear')
+    compile 'com.google.android.gms:play-services-wearable:+'
+    compile 'info.hoang8f:fbutton:1.0.5'
+    compile 'com.squareup.picasso:picasso:2.3.3'
+    compile 'com.github.dmytrodanylyk.circular-progress-button:library:1.1.0'
+    compile files('libs/twitter4j-core-4.0.2.jar')
+    compile 'de.hdodenhof:circleimageview:1.2.0'
+
+}

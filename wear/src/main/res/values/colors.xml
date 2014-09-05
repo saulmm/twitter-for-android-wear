@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="tw_color_1">#CCECFA</color>
+    <color name="tw_color_2">#41B4E4</color>
+    <color name="tw_color_3">#00ACEE</color>
+    <color name="tw_color_4">#2B86B9</color>
+    <color name="tw_disabled_color">#8F9DA6</color>
+    <color name="wall_color">#3A99D8</color>
+
+</resources>
