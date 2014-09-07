@@ -1,0 +1,441 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Android wear twitter by saulmm</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header">Android wear twitter</h1>
+        <p class="header"></p>
+
+        <ul>
+          <li class="download"><a class="buttons" href="https://github.com/saulmm/android_wear_twitter/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/saulmm/android_wear_twitter/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/saulmm/android_wear_twitter">View On GitHub</a></li>
+        </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/saulmm">saulmm</a></p>
+
+
+      </header>
+      <section>
+        <h1>
+<a name="twitter-client-for-android-wear" class="anchor" href="#twitter-client-for-android-wear"><span class="octicon octicon-link"></span></a>Twitter client for android wear</h1>
+
+<h2>
+<a name="1-motivation" class="anchor" href="#1-motivation"><span class="octicon octicon-link"></span></a>1. Motivation</h2>
+
+<p>The motivation of this project was to learn how the android wear framework works, using theirs views, communication APIs, etc...</p>
+
+<p>A second objective was to share it as a reference project, so others can use it, modify it or make what they want with it. </p>
+
+<p>I think that is very useful to learn by example, so I really aprecciate projects like this.</p>
+
+<h2>
+<a name="2-project-structure" class="anchor" href="#2-project-structure"><span class="octicon octicon-link"></span></a>2. Project structure</h2>
+
+<p>If you create a project with android wear and android studio, you will be se two main modules: <strong>wear</strong> and <strong>mobile</strong>.</p>
+
+<p>When you make an android wear <em>release</em>, you get a single <em>.apk</em>, which will be downloaded from google play by your users, when one of them install that <em>.apk</em> on his phone, another app will be installed automatically on his wearable. That's because the release <em>apk's</em> with android wear, has an 'micro-apk' inside them.</p>
+
+<p>That <em>micro-apk</em> is built by the <strong>wear</strong> module, and the app that is installed on their phone consists on the <strong>mobile</strong> module.</p>
+
+<p><img src="https://87ccd03f34f5850e9f58050faacff843fdb2a928.googledrive.com/host/0B62SZ3WRM2R2TDVIN2ptNGVndE0" alt=""></p>
+
+<p>At develop time, you can compile your <strong>wear</strong> module directly on your wear device or emulator.</p>
+
+<h2>
+<a name="3-handheld-app" class="anchor" href="#3-handheld-app"><span class="octicon octicon-link"></span></a>3. Handheld app</h2>
+
+<p>Like a normal android app, has an <em>activity</em>, a few <em>fragments</em> and some layouts, the user, when press the <em>login</em> button, will see a browser with the twitter login, if everything goes well the main fragment will change and the user will see their twitter profile photo, username, and the background will turn to their twitter profile background.</p>
+
+<p><img src="https://cef58420144e1df00f893fa4436747dce6972cb0.googledrive.com/host/0B62SZ3WRM2R2V0Y2MlpwR3lEcUU" alt=""></p>
+
+<p>The interesting part from my point of view is the communication with the wearable. </p>
+
+<p>The clock awalys could ask the list of tweets, so the class that asks twitter for the tweets must always be available and able to take care of it, so I think that a service is the best choice.</p>
+
+<pre><code>&lt;service android:name=".services.WearService"/&gt;
+</code></pre>
+
+<p>That service must be started when the device boots, otherwise the user would have to open the application after start manually, I do not think it's the best option, I can reach that with a broadcast receiver</p>
+
+<pre><code>&lt;receiver android:name=".receivers.BootReceiver" android:enabled="true" android:exported="false"&gt;
+  &lt;intent-filter&gt;
+    &lt;action android:name="android.intent.action.BOOT_COMPLETED"/&gt;
+  &lt;/intent-filter&gt;
+&lt;/receiver&gt;
+</code></pre>
+
+<p>For all twitter connections I had relied in the library <a href="http://twitter4j.org/en/index.html">twitter4j</a>, a very mature and complete java library responsible for all interaction with twitter APIs, you only have to create an app in twitter developers, <strong>twitter4j</strong> will do the hard work.</p>
+
+<h3>
+<a name="wearable-comunication" class="anchor" href="#wearable-comunication"><span class="octicon octicon-link"></span></a>Wearable comunication</h3>
+
+<p>And here's the fun part, after reviewing the documentation developers android communication with the wearable device is almost trivial. There are certain steps that must be respected:</p>
+
+<ol>
+<li>Connect with <strong>Google Play Services</strong>
+</li>
+</ol><div class="highlight highlight-java"><pre><span class="nd">@Override</span>
+<span class="kd">public</span> <span class="kt">void</span> <span class="nf">onCreate</span><span class="o">()</span> <span class="o">{</span>
+   <span class="kd">super</span><span class="o">.</span><span class="na">onCreate</span><span class="o">();</span>
+
+   <span class="c1">// Init &amp; connect gApiClient</span>
+   <span class="n">googleApiClient</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">Builder</span><span class="o">(</span><span class="k">this</span><span class="o">)</span>
+      <span class="o">.</span><span class="na">addConnectionCallbacks</span> <span class="o">(</span><span class="n">gConnectionCallbacks</span><span class="o">)</span>
+      <span class="o">.</span><span class="na">addOnConnectionFailedListener</span> <span class="o">(</span><span class="n">gConnectionFailed</span><span class="o">)</span>
+      <span class="o">.</span><span class="na">addApi</span><span class="o">(</span><span class="n">Wearable</span><span class="o">.</span><span class="na">API</span><span class="o">)</span>
+      <span class="o">.</span><span class="na">build</span><span class="o">();</span>
+<span class="o">}</span>
+</pre></div>
+
+<ol>
+<li>Call <code>.connect()</code> method</li>
+</ol><div class="highlight highlight-java"><pre>   <span class="n">googleApiClient</span><span class="o">.</span><span class="na">connect</span><span class="o">();</span>
+</pre></div>
+
+<ol>
+<li>Wait <code>onConnected()</code> to be called</li>
+</ol><div class="highlight highlight-java"><pre><span class="kd">private</span> <span class="kd">final</span> <span class="n">ConnectionCallbacks</span> <span class="n">gConnectionCallbacks</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">ConnectionCallbacks</span><span class="o">()</span> <span class="o">{</span>
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onConnected</span><span class="o">(</span><span class="n">Bundle</span> <span class="n">bundle</span><span class="o">)</span> <span class="o">{</span>
+
+       <span class="c1">// Subscribe wear listeners</span>
+       <span class="n">Wearable</span><span class="o">.</span><span class="na">MessageApi</span><span class="o">.</span><span class="na">addListener</span><span class="o">(</span><span class="n">googleApiClient</span><span class="o">,</span> <span class="n">wearMessageListener</span><span class="o">);</span>
+    <span class="o">}</span>
+
+    <span class="nd">@Override</span>
+    <span class="kd">public</span> <span class="kt">void</span> <span class="nf">onConnectionSuspended</span><span class="o">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">)</span> <span class="o">{</span>
+
+        <span class="o">[...]</span>
+    <span class="o">}</span>
+<span class="o">};</span>
+
+</pre></div>
+
+<p>At this point, the device is ready to communicate with android wear devices if all went well, otherwhise the <code>onConnectionFailedListener</code> would be fired.</p>
+
+<p>Now we can use the communicate APIs that google provide us, there is 3 APIs to communicate to communicate with the wearable: <code>MessageApi</code>, <code>NodeApi</code>, <code>DataApi</code>.</p>
+
+<h3>
+<a name="messageapi" class="anchor" href="#messageapi"><span class="octicon octicon-link"></span></a>MessageApi</h3>
+
+<p>La primera comunicación con el wearable trata de averiguar si el servicio está corriendo, es algo parecido a:</p>
+
+<p>_¿Hola, estás ahí?  _
+_Aqui estoy, adelante _<br></p>
+
+<p>En el lenguaje de wear:</p>
+
+<p><code>/tweets/state/hi/</code> <em>(wearable)</em> 
+<code>/tweets/state/how4u/</code> <em>(device)</em> <br></p>
+
+<p>Después de esto el <em>wearable</em> ya sabe que hay el servicio esta disponible para poder pedir la lista de tweets del usuario. Para mandar mensajes, tanto en el <em>wearable</em> como en el <em>device</em> he usado la misma implementación de una <em>asynctask</em></p>
+
+<pre><code>class SendMessageTask extends AsyncTask &lt;Void, Void, Void&gt; {
+
+   private final String message;
+
+   SendMessageTask(String message) {
+      this.message = message;
+   }
+
+   @Override
+   protected Void doInBackground(Void... params) {
+
+       // Such as /wear/message
+       String activityPath = message;
+
+       MessageApi.SendMessageResult result =  MessageApi.sendMessage(
+           googleApiClient, connectedNodes.get(0).getId(), 
+           activityPath, null)
+           .await();
+    }
+
+    return null;
+    }
+}
+</code></pre>
+
+<p>After call to <code>googleApiClient()</code>and wait to <code>onConnected()</code> were called, we registered to receive message events using the <code>Wear.MessageListener.addListener(myListener)</code> method, so we are able to manage the messages with this method</p>
+
+<pre><code>private final MessageApi.MessageListener wearMessageListener = new MessageApi.MessageListener() {
+    @Override
+    public void onMessageReceived(MessageEvent messageEvent) {
+
+        String msg = messageEvent.getPath();
+        Log.d("[DEBUG] WearService - onMessageReceived", "Message received: " + msg);
+
+        [...]
+    }
+}
+</code></pre>
+
+<h3>
+<a name="dataapi" class="anchor" href="#dataapi"><span class="octicon octicon-link"></span></a>DataApi</h3>
+
+<p>The DataApi allows you to synchronice data between handhelf and wearables, a message in the Data Api consists of a <strong>Payload</strong>, to send whatever data you wish, ad <strong>Path</strong>, a unique string starting with a forward slash.</p>
+
+<p>Instead to send a byte array you can use <code>DataMaps</code>, are used as android bundles inside the DataApi</p>
+
+<p>To send &amp; receive the tweets from the handfeld to the wear device, y used DataMaps with strings composed by fields separed by a pattern (Maybe this is not the best option).</p>
+
+<p>In this case, I have implemented an <em>asynctask</em> for send the twitter timeline after receiving with <em>twitter4</em>. The timelien is sent as a <code>ArrayList&lt;String&gt;</code></p>
+
+<pre><code>
+class SendTimeLineTask  extends AsyncTask&lt;Void, Void, Void&gt; {
+
+    private final ArrayList &lt;String&gt;  contents;
+
+    public SendTimeLineTask (Context c, ArrayList &lt;String&gt; contents) {
+        this.contents = contents;
+}
+
+    @Override
+    protected Void doInBackground(Void... nodes) {
+
+    PutDataMapRequest dataMap = PutDataMapRequest
+        .create (Constants.TIME_LINE_DATA);
+
+    dataMap.getDataMap().putStringArrayList("contents", contents);
+
+    PutDataRequest request = dataMap.asPutDataRequest();
+
+    DataApi.DataItemResult dataItemResult = Wearable.DataApi
+        .putDataItem(googleApiClient, request)
+        .await();
+
+
+    return null;
+    }
+}
+
+</code></pre>
+
+<h3>
+<a name="4wearable-app" class="anchor" href="#4wearable-app"><span class="octicon octicon-link"></span></a>4.Wearable app</h3>
+
+<p><img src="https://219ede0846187d7fd9922311fa441d9820915b2c.googledrive.com/host/0B62SZ3WRM2R2bHhlVExmakJEaFU" alt=""></p>
+
+<p>An application for android wear is programmed like a normal android app, with a few differences, you can't all the android APIs that you normally use in a common android app such as <code>android.net</code>. Also,  you have to notice that the user experience is a little bit difference than a normal Android app.</p>
+
+<p>The wear app, is composed by the following activities:</p>
+
+<ul>
+<li><p><code>WaitActivity</code> - An activity shown meanwhile the handfeld app is requesting the user timeline. In backwards this activity makes a hard work of communication with the handfeld app.</p></li>
+<li><p><code>StreamActivity</code>- An activity that shows the user <em>timeline</em>, also allows to <em>retweet</em> a tweet or flag as favorited.</p></li>
+</ul><h4>
+<a name="waitactivity" class="anchor" href="#waitactivity"><span class="octicon octicon-link"></span></a>WaitActivity</h4>
+
+<p>The effect of the 'spinner' is a simple ImageView, with the following animation applied</p>
+
+<p><img src="https://3a3c2487a21adf7eab9f9e1c949cb1c6fbc1a71f.googledrive.com/host/0B62SZ3WRM2R2MldQdDNXVTk5bmc" alt=""></p>
+
+<div class="highlight highlight-xml"><pre><span class="nt">&lt;rotate</span>
+    <span class="na">xmlns:android=</span><span class="s">"http://schemas.android.com/apk/res/android"</span>
+    <span class="na">android:duration=</span><span class="s">"1000"</span>
+    <span class="na">android:repeatCount=</span><span class="s">"infinite"</span>
+    <span class="na">android:fromDegrees=</span><span class="s">"0"</span>
+    <span class="na">android:interpolator=</span><span class="s">"@android:anim/anticipate_overshoot_interpolator"</span>
+    <span class="na">android:pivotX=</span><span class="s">"50%"</span>
+    <span class="na">android:pivotY=</span><span class="s">"50%"</span>
+    <span class="na">android:toDegrees=</span><span class="s">"359"</span> <span class="nt">/&gt;</span>
+</pre></div>
+
+<div class="highlight highlight-java"><pre>  <span class="n">loadingSegment</span> <span class="o">=</span> <span class="o">(</span><span class="n">ImageView</span><span class="o">)</span> <span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">loading_segment</span><span class="o">);</span>
+  <span class="n">loadingSegment</span><span class="o">.</span><span class="na">startAnimation</span><span class="o">(</span><span class="n">AnimationUtils</span><span class="o">.</span><span class="na">loadAnimation</span><span class="o">(</span><span class="k">this</span><span class="o">,</span> <span class="n">R</span><span class="o">.</span><span class="na">anim</span><span class="o">.</span><span class="na">loading_animation</span><span class="o">));</span>
+
+</pre></div>
+
+<p>If there is any problem the 'Loading...' message will turn to show the error and the background, produced by a <code>&lt;transition&gt;</code></p>
+
+<p><img src="https://919c5da1a105a3a06e03fa4ec2c9901a70398228.googledrive.com/host/0B62SZ3WRM2R2TXNNWlJPREVXQTA" alt=""></p>
+
+<pre><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;transition xmlns:android="http://schemas.android.com/apk/res/android"&gt;
+    &lt;item android:drawable="@drawable/wait_idle" /&gt;
+    &lt;item android:drawable="@drawable/wait_error" /&gt;
+&lt;/transition&gt;
+</code></pre>
+
+<pre><code>&lt;FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    ...
+    android:background="@drawable/tr_error"
+    ...
+    &gt;
+&lt;/FrameLayout&gt;    
+</code></pre>
+
+<p>A protocol of messages is established to perform the communication, first of all, in the <code>WaitActivity</code> a message task is sent with the messaje 'available', after 3 seconds if the handfeld app doesn't responds, it means that there is a problem with the service, so show the proper message to the user. </p>
+
+<p>If the handfeld app responds successfully the wearable will sent another message taks to tell the handfeld app that has to start to request the user tweets, when the request is done, the handfeld app will sent a DataTask with a list of tweets</p>
+
+<p>The wear message listener...</p>
+
+<pre><code>  @Override
+    public void onMessageReceived(MessageEvent messageEvent) {
+
+        String messagePath = messageEvent.getPath();
+
+        if (messagePath.equals("/tweets/operation/ok")) {
+            onRetweetListener.onActionOK();
+        }
+
+        if (messagePath.equals("/tweets/operation/fail")) {
+            onRetweetListener.onActionFail();
+        }
+
+        if (messagePath.equals("/tweets/state/no_internet")) {
+            deviceListener.onProblem(messagePath);
+        }
+
+        if (messagePath.equals("/tweets/state/available")) {
+            isTwitterServiceIsRunning = true;
+        }
+    }
+</code></pre>
+
+<p>The tweets message listener (DataListener):</p>
+
+<pre><code>    @Override
+    public void onDataChanged(DataEventBuffer dataEvents) {
+
+        for (DataEvent event: dataEvents) {
+
+            String eventUri = event.getDataItem().getUri().toString();
+
+            if (eventUri.contains ("/twitter/timeline")) {
+
+                DataMapItem dataItem = DataMapItem.fromDataItem (event.getDataItem());
+                ArrayList &lt;String&gt; tweets = dataItem.getDataMap().getStringArrayList("contents");
+                deviceListener.onTimeLimeReceived(tweets);
+            }
+        }
+    }
+</code></pre>
+
+<h4>
+<a name="protocol" class="anchor" href="#protocol"><span class="octicon octicon-link"></span></a>Protocol:</h4>
+
+<p><strong>To get the timeline in the wearable:</strong></p>
+
+<p>"/tweets/hi/"                   <em>(Wearable)</em>    <em>MessageApi</em> 
+"/tweets/state/available"       <em>(Device)</em>      <em>MessageApi</em>
+"/twitter/timeline"             <em>(Wearable)</em>    <em>MessageApi</em>
+"/twitter/timeline"             <em>(Device)</em>      <em>DataApi</em></p>
+
+<p><strong>Retweet a tweet:</strong></p>
+
+<p>"/tweets/retweet/"                  <em>(Wearable)</em>    <em>MessageApi</em> 
+"/tweets/operation/ok"              <em>(Device)</em>      <em>MessageApi</em>
+"/tweets/operation/fail"                <em>(Device)</em>      <em>MessageApi</em></p>
+
+<p><strong>Flag a tweet as favorite:</strong></p>
+
+<p>"/tweets/favorite/"                 <em>(Wearable)</em>    <em>MessageApi</em> 
+"/tweets/operation/ok"              <em>(Device)</em>      <em>MessageApi</em>
+"/tweets/operation/fail"            <em>(Device)</em>      <em>MessageApi</em></p>
+
+<h2>
+<a name="streamactivity" class="anchor" href="#streamactivity"><span class="octicon octicon-link"></span></a>StreamActivity</h2>
+
+<p>After <em>'WaitActivity'</em> do the hard work, the <em>'StreamActivity'</em> will be shown, this one will show a <code>GridViewPager</code>, that view will allow to scroll down seeing the available tweets, scrolling right the user will be able to rewtweet a tweet o flag one as favorite.</p>
+
+<p>The <code>GridViewPager</code> works with a <code>FragmentGridAdapter</code>, that works like the common adapters used in <code>ListViews</code>, <code>GridViews</code>, etc...</p>
+
+<div class="highlight highlight-java"><pre>        <span class="o">...</span>
+        <span class="n">streamPager</span> <span class="o">=</span> <span class="o">(</span><span class="n">GridViewPager</span><span class="o">)</span> <span class="n">findViewById</span><span class="o">(</span><span class="n">R</span><span class="o">.</span><span class="na">id</span><span class="o">.</span><span class="na">stream_pager</span><span class="o">);</span>
+
+        <span class="n">streamPager</span><span class="o">.</span><span class="na">setAdapter</span><span class="o">(</span><span class="k">new</span> <span class="nf">TwitterAdapter</span> <span class="o">(</span><span class="n">StreamActivity</span><span class="o">.</span><span class="na">this</span><span class="o">,</span>
+                <span class="n">getFragmentManager</span><span class="o">(),</span> <span class="n">visibleTweets</span><span class="o">));</span>
+
+        <span class="o">...</span>
+</pre></div>
+
+<div class="highlight highlight-java"><pre>    <span class="kd">class</span> <span class="nc">TwitterAdapter</span> <span class="kd">extends</span> <span class="n">FragmentGridPagerAdapter</span> <span class="o">{</span>
+        <span class="kd">private</span> <span class="n">Context</span> <span class="n">context</span><span class="o">;</span>
+        <span class="kd">private</span> <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Tweet</span><span class="o">&gt;</span> <span class="n">tweets</span><span class="o">;</span>
+
+        <span class="kd">public</span> <span class="nf">TwitterAdapter</span><span class="o">(</span><span class="n">Context</span> <span class="n">context</span><span class="o">,</span> <span class="n">FragmentManager</span> <span class="n">fm</span><span class="o">,</span> <span class="n">ArrayList</span><span class="o">&lt;</span><span class="n">Tweet</span><span class="o">&gt;</span> <span class="n">tweets</span><span class="o">)</span> <span class="o">{</span>
+            <span class="kd">super</span><span class="o">(</span><span class="n">fm</span><span class="o">);</span>
+
+            <span class="k">this</span><span class="o">.</span><span class="na">tweets</span> <span class="o">=</span> <span class="n">tweets</span><span class="o">;</span>
+            <span class="k">this</span><span class="o">.</span><span class="na">context</span> <span class="o">=</span> <span class="n">context</span><span class="o">;</span>
+        <span class="o">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="n">Fragment</span> <span class="nf">getFragment</span><span class="o">(</span><span class="kt">int</span> <span class="n">row</span><span class="o">,</span> <span class="kt">int</span> <span class="n">column</span><span class="o">)</span> <span class="o">{</span>
+            <span class="n">Tweet</span> <span class="n">currentTweet</span> <span class="o">=</span> <span class="n">tweets</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="n">row</span><span class="o">);</span>
+            <span class="n">TwitterActionFragment</span> <span class="n">twitterActionFragment</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">TwitterActionFragment</span><span class="o">();</span>
+
+            <span class="k">if</span> <span class="o">(</span><span class="n">column</span> <span class="o">==</span> <span class="mi">0</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">TweetFragment</span> <span class="n">tf</span> <span class="o">=</span> <span class="k">new</span> <span class="nf">TweetFragment</span><span class="o">();</span>
+                <span class="n">tf</span><span class="o">.</span><span class="na">setCardTweet</span><span class="o">(</span><span class="n">currentTweet</span><span class="o">);</span>
+                <span class="k">return</span> <span class="n">tf</span><span class="o">;</span>
+
+            <span class="o">}</span> <span class="k">else</span> <span class="nf">if</span> <span class="o">(</span><span class="n">column</span> <span class="o">==</span> <span class="mi">1</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">twitterActionFragment</span><span class="o">.</span><span class="na">setTwAction</span><span class="o">(</span><span class="n">TwitterAction</span><span class="o">.</span><span class="na">RETWEET</span><span class="o">);</span>
+
+            <span class="o">}</span> <span class="k">else</span> <span class="nf">if</span> <span class="o">(</span><span class="n">column</span> <span class="o">==</span> <span class="mi">2</span><span class="o">)</span> <span class="o">{</span>
+                <span class="n">twitterActionFragment</span><span class="o">.</span><span class="na">setTwAction</span><span class="o">(</span><span class="n">TwitterAction</span><span class="o">.</span><span class="na">FAVORITE</span><span class="o">);</span>
+            <span class="o">}</span>
+
+            <span class="n">twitterActionFragment</span><span class="o">.</span><span class="na">setCurrentTweet</span><span class="o">(</span><span class="n">currentTweet</span><span class="o">);</span>
+            <span class="k">return</span> <span class="n">twitterActionFragment</span><span class="o">;</span>
+        <span class="o">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getRowCount</span><span class="o">()</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="n">tweets</span><span class="o">.</span><span class="na">size</span><span class="o">();</span>
+        <span class="o">}</span>
+
+        <span class="nd">@Override</span>
+        <span class="kd">public</span> <span class="kt">int</span> <span class="nf">getColumnCount</span><span class="o">(</span><span class="kt">int</span> <span class="n">row</span><span class="o">)</span> <span class="o">{</span>
+            <span class="k">return</span> <span class="mi">3</span><span class="o">;</span>
+        <span class="o">}</span>
+    <span class="o">}</span>
+</pre></div>
+
+<p>And the layout</p>
+
+<div class="highlight highlight-xml"><pre><span class="cp">&lt;?xml version="1.0" encoding="utf-8"?&gt;</span>
+
+<span class="nt">&lt;LinearLayout</span>
+    <span class="na">xmlns:android=</span><span class="s">"http://schemas.android.com/apk/res/android"</span>
+    <span class="na">android:layout_width=</span><span class="s">"match_parent"</span>
+    <span class="na">android:layout_height=</span><span class="s">"match_parent"</span>
+    <span class="na">android:orientation=</span><span class="s">"vertical"</span>
+    <span class="na">android:background=</span><span class="s">"@drawable/tw_wall"</span>
+    <span class="nt">&gt;</span>
+
+    <span class="nt">&lt;android.support.wearable.view.GridViewPager</span>
+    <span class="na">android:id=</span><span class="s">"@+id/stream_pager"</span>
+    <span class="na">android:layout_width=</span><span class="s">"match_parent"</span>
+    <span class="na">android:layout_height=</span><span class="s">"match_parent"</span>
+    <span class="na">android:keepScreenOn=</span><span class="s">"true"</span>
+    <span class="nt">/&gt;</span>
+<span class="nt">&lt;/LinearLayout&gt;</span>
+
+__NOTE__ _There is a known bug , sometimes the handfeld service is not retweeting and marking a tweet as favorite well, that's because the twitter keys expires. Will be fixed soon_
+</pre></div>
+      </section>
+      <footer>
+        <p><small>Hosted on <a href="http://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		
+  </body>
+</html>
