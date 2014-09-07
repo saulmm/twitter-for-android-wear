@@ -1,54 +1,56 @@
-# Cliente de Twitter para android wear
+# Twitter client for android wear
 
-1. Motivación
-2. Estructura
-3. Aplicación del dispositivo
-4. Aplicación del wearable
-5. Librerías de terceros
+## 1. Motivation
 
+The motivation of this project was to learn how the android wear framework works, using theirs views, communication APIs, etc...
 
-## 1. Motivación
+A second objective was to share it as a reference project, so others can use it, modify it or make what they want with it. 
 
-La motivación de este proyecto era aprender yo mismo el funcionamiento de android wear: _customViews_, comunicaciones, etc...
+I think that is very useful to learn by example, so I really aprecciate projects like this.
 
-Un segundo objetivo y no menos importante es que sirva de proyecto para que otros puedan usarlo a modo de consulta para construir sus proyectos, pienso que resulta muy util un proyecto que implemente algo que te interese para que lo puedas consultar.
+## 2. Project structure
 
-## 2. Estructura
+If you create a project with android wear and android studio, you will be se two main modules: __wear__ and __mobile__.
 
-Un proyecto de android wear, consta de dos módulos, uno es el proyecto que construirá la aplicación para el dispositivo, y el otro, para el wearable
+When you make an android wear _release_, you get a single _.apk_, which will be downloaded from google play by your users, when one of them install that _.apk_ on his phone, another app will be installed automatically on his wearable. That's because the release _apk's_ with android wear, has an 'micro-apk' inside them.
 
-![](md_images/file_estructure.png)
+That _micro-apk_ is built by the __wear__ module, and the app that is installed on their phone consists on the __mobile__ module.
 
-Ambos proyectos constan de sus propias actividades, recuros, manifest.xml etc... dos proyectos separados, una nota importante es que ambos proyectos han de tener el mismo nombre del paquete.
+![](https://87ccd03f34f5850e9f58050faacff843fdb2a928.googledrive.com/host/0B62SZ3WRM2R2TDVIN2ptNGVndE0)
 
-En tiempo de desarrollo, pudes probar las aplicaciones instalando directamente en el wearable o en el disposivo, pero al hacer la release, el apk sera del proyecto mobile, dentro de ella, se hallará una micro apk que se instalará automáticamente en el dispositivo wearable del usuario.
+At develop time, you can compile your __wear__ module directly on your wear device or emulator.
 
+## 3. Handheld app
 
-## 3. Aplicación para el dispositivo
+Like a normal android app, has an _activity_, a few _fragments_ and some layouts, the user, when press the _login_ button, will see a browser with the twitter login, if everything goes well the main fragment will change and the user will see their twitter profile photo, username, and the background will turn to their twitter profile background.
 
-Una aplicación normal android, con sus _activities_, _layouts_ básicamente, de cara al usuario se presenta un navegador para loguearse con twitter, si todo va bién se muestra una actividad con diciéndole que ya está conectado mostrándole su foto de perfil.
+![](https://cef58420144e1df00f893fa4436747dce6972cb0.googledrive.com/host/0B62SZ3WRM2R2V0Y2MlpwR3lEcUU)
 
-La parte interesante desde mi punto de vista es la comunicación con el wearable.
+The interesting part from my point of view is the communication with the wearable. 
 
-En todo momento el reloj podría pedir la lista de tweets, por lo que una parte de la aplicación siempre debería estar ejecutándose y poder encargarse de ello, para ello creo que un servicio es la mejor opción.
+The clock awalys could ask the list of tweets, so the class that asks twitter for the tweets must always be available and able to take care of it, so I think that a service is the best choice.
 
 ```
 <service android:name=".services.WearService"/>
 ```
 
-Por otro lado, el servicio debe iniciarse desde que se enciende el dispositivo, de otra forma el usuario tendría que abrir la aplicación despues de iniciarlo, no creo que sea la mejor opcion.
+That service must be started when the device boots, otherwise the user would have to open the application after start manually, I do not think it's the best option, I can reach that with a broadcast receiver
 
 ```
-<uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+<receiver android:name=".receivers.BootReceiver" android:enabled="true" android:exported="false">
+  <intent-filter>
+    <action android:name="android.intent.action.BOOT_COMPLETED"/>
+  </intent-filter>
+</receiver>
 ```
 
-Para toda las conexiones con twitter me he basado en la librería **twitter4j**, una librería muy madura y completa para java encargada de toda la interacción con las APIs de twitter, unicamente crear la apllicación en twitter developers, seguir un poco la documentación y listo.
+For all twitter connections I had relied in the library [twitter4j](http://twitter4j.org/en/index.html), a very mature and complete java library responsible for all interaction with twitter APIs, you only have to create an app in twitter developers, __twitter4j__ will do the hard work.
 
-### Comunicación con wearable
+### Wearable comunication
 
-Y aquí la parte divertida, después de revisar la documentación de android developers la comunicación con el dispositivo wearable es casi trivial. Hay ciertos pasos que hay que respetar:
+And here's the fun part, after reviewing the documentation developers android communication with the wearable device is almost trivial. There are certain steps that must be respected:
 
-1. Conectar gon _Google Play Services_
+1. Connect with **Google Play Services**
 
 ```java
 @Override
@@ -61,12 +63,16 @@ public void onCreate() {
       .addOnConnectionFailedListener (gConnectionFailed)
       .addApi(Wearable.API)
       .build();
-
-   googleApiClient.connect();
 }
 ```
 
-2. Esperar a que ```onConnected()``` sea llamado
+2. Call ```.connect()``` method
+
+```java
+   googleApiClient.connect();
+```
+
+2. Wait ```onConnected()``` to be called
 
 ```java
 private final ConnectionCallbacks gConnectionCallbacks = new ConnectionCallbacks() {
@@ -85,26 +91,22 @@ private final ConnectionCallbacks gConnectionCallbacks = new ConnectionCallbacks
 };
 
 ```
+At this point, the device is ready to communicate with android wear devices if all went well, otherwhise the ```onConnectionFailedListener``` would be fired.
 
-En este punto, el dispositivo está preparado para recibir mensajes mandados desde el dispositivos, en _android wear_, hay tres APIs de comunicación: ```MessageApi```, ```NodeApi```, ```DataApi```. 
+Now we can use the communicate APIs that google provide us, there is 3 APIs to communicate to communicate with the wearable: ```MessageApi```, ```NodeApi```, ```DataApi```.
 
-
-
-
-EXPLICACIón MUY BREVE DE LAS APis
 ### MessageApi
-
 
 
 La primera comunicación con el wearable trata de averiguar si el servicio está corriendo, es algo parecido a:
 
-- ¿Hola, estás ahí?
-- Aqui estoy adelante
+_¿Hola, estás ahí?  _
+_Aqui estoy, adelante _<br>
 
 En el lenguaje de wear:
 
-- ```/tweets/state/hi/``` _(wearable)_
-- ```/tweets/state/how4u/``` _(device)_
+```/tweets/state/hi/``` _(wearable)_ 
+```/tweets/state/how4u/``` _(device)_ <br>
 
 Después de esto el _wearable_ ya sabe que hay el servicio esta disponible para poder pedir la lista de tweets del usuario. Para mandar mensajes, tanto en el _wearable_ como en el _device_ he usado la misma implementación de una _asynctask_
 
@@ -135,7 +137,7 @@ class SendMessageTask extends AsyncTask <Void, Void, Void> {
 }
 ```
 
-Como se registro el listener para la api de mensajes en ```onConnected()``` también podemos recibir mensajes desde el wearable:
+After call to ```googleApiClient()```and wait to ```onConnected()``` were called, we registered to receive message events using the ```Wear.MessageListener.addListener(myListener)``` method, so we are able to manage the messages with this method
 
 ```
 private final MessageApi.MessageListener wearMessageListener = new MessageApi.MessageListener() {
@@ -152,11 +154,13 @@ private final MessageApi.MessageListener wearMessageListener = new MessageApi.Me
 
 ### DataApi
 
-Para sincronizar datos, la mejor opción es la ```DataApi```, la que permite enviar tanto un ```payload``` serializando bytes como desees, o en forma de ```DataMaps```, envíando los datos como si de un ```Bundle``` se tratara.
+The DataApi allows you to synchronice data between handhelf and wearables, a message in the Data Api consists of a __Payload__, to send whatever data you wish, ad __Path__, a unique string starting with a forward slash.
 
-Para esta aplicación se ha utilizado ```DataMaps``` de esa forma, separando los datos por una cadena determinada, (quizás esta no sea la mejor opción) se consiguen enviar datos de una forma sencilla.
+Instead to send a byte array you can use ```DataMaps```, are used as android bundles inside the DataApi
 
-,En este caso, se ha implementado una _asynctask_ para el envio del _timeline_, tras recibirlo con _twitter4j_ es mandado como un	 ```ArrayList<string>``` al wearable, se podría haber elegido otro modo, como serializar un _JSON_ y hacer el parser en el wearble, pero por rapidez se eligió ese.
+To send & receive the tweets from the handfeld to the wear device, y used DataMaps with strings composed by fields separed by a pattern (Maybe this is not the best option).
+
+In this case, I have implemented an _asynctask_ for send the twitter timeline after receiving with _twitter4_. The timelien is sent as a ```ArrayList<String>```
 
 ````
 
@@ -189,24 +193,26 @@ class SendTimeLineTask  extends AsyncTask<Void, Void, Void> {
 
 ```
 
-### 4.Aplicación para el wearable
+### 4.Wearable app
 
-Una aplicación para android wear se programa casi igual que una aplicación normal android, la aplicacion que se instala en el wearable tiene únicamente dos actividades:
+![](https://219ede0846187d7fd9922311fa441d9820915b2c.googledrive.com/host/0B62SZ3WRM2R2bHhlVExmakJEaFU)
 
-- ```WaitActivity``` - Actividad mostrada mientras el dispositivo hace la petición a twitter y envía los tweets al wearable
+An application for android wear is programmed like a normal android app, with a few differences, you can't all the android APIs that you normally use in a common android app such as ```android.net```. Also,  you have to notice that the user experience is a little bit difference than a normal Android app.
 
-- ```StreamActivity```- Actividad que mostrará el _timeline_ del usuario, también permite hacer _retweet_ o marcar como favorito un _tweet_ determinado
+The wear app, is composed by the following activities:
+
+- ```WaitActivity``` - An activity shown meanwhile the handfeld app is requesting the user timeline. In backwards this activity makes a hard work of communication with the handfeld app.
+
+- ```StreamActivity```- An activity that shows the user _timeline_, also allows to _retweet_ a tweet or flag as favorited.
 
 #### WaitActivity
 
-Esta aplicación espera a que el dispositivo haga la petición mientras, por medio de una animación y una vista sencilla construye una especie de spinner y muestra un mensaje al usuario.
-
+The effect of the 'spinner' is a simple ImageView, with the following animation applied
 
 ![](https://3a3c2487a21adf7eab9f9e1c949cb1c6fbc1a71f.googledrive.com/host/0B62SZ3WRM2R2MldQdDNXVTk5bmc)
+  
 
-El efector del spinner es una simple imagen aplicada por una simple animación
-
-```
+```xml
 <rotate
 	xmlns:android="http://schemas.android.com/apk/res/android"
 	android:duration="1000"
@@ -218,8 +224,13 @@ El efector del spinner es una simple imagen aplicada por una simple animación
 	android:toDegrees="359" />
 ```
 
-Si hubiera algún problema el mensaje de 'Loading...' cambiaría al error producido y el fondo mediante un ```<transition>``` se cambiaría a rojo.
+```java
+  loadingSegment = (ImageView) findViewById(R.id.loading_segment);
+  loadingSegment.startAnimation(AnimationUtils.loadAnimation(this, R.anim.loading_animation));
 
+```
+
+If there is any problem the 'Loading...' message will turn to show the error and the background, produced by a ```<transition>```
 
 ![](https://919c5da1a105a3a06e03fa4ec2c9901a70398228.googledrive.com/host/0B62SZ3WRM2R2TXNNWlJPREVXQTA)
 
@@ -231,12 +242,69 @@ Si hubiera algún problema el mensaje de 'Loading...' cambiaría al error produc
 </transition>
 ```
 
+```
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    ...
+    android:background="@drawable/tr_error"
+    ...
+    >
+</FrameLayout>    
+```
 
-La parte de comunicación con el dispositivo es como la explicada en la parte de la app del dispositivo, se etablece un protocolo de mensajes mediante la ```MessageApi```para finalmente ecuchar al método ```OnDataChanged()``` implementado por ```Wear.DataApi.Listener```, para recibir los tweets en forma de ``ÀrrayList<string>```, 
 
-El protocolo de  comunicación en cuanto al envío es el siguiente:
+A protocol of messages is established to perform the communication, first of all, in the ```WaitActivity``` a message task is sent with the messaje 'available', after 3 seconds if the handfeld app doesn't responds, it means that there is a problem with the service, so show the proper message to the user. 
 
-**Para obtener el timeline:**
+If the handfeld app responds successfully the wearable will sent another message taks to tell the handfeld app that has to start to request the user tweets, when the request is done, the handfeld app will sent a DataTask with a list of tweets
+
+The wear message listener...
+
+```
+  @Override
+    public void onMessageReceived(MessageEvent messageEvent) {
+
+        String messagePath = messageEvent.getPath();
+
+        if (messagePath.equals("/tweets/operation/ok")) {
+            onRetweetListener.onActionOK();
+        }
+
+        if (messagePath.equals("/tweets/operation/fail")) {
+            onRetweetListener.onActionFail();
+        }
+
+        if (messagePath.equals("/tweets/state/no_internet")) {
+            deviceListener.onProblem(messagePath);
+        }
+
+        if (messagePath.equals("/tweets/state/available")) {
+            isTwitterServiceIsRunning = true;
+        }
+    }
+``` 
+  
+The tweets message listener (DataListener):
+
+```
+    @Override
+    public void onDataChanged(DataEventBuffer dataEvents) {
+
+        for (DataEvent event: dataEvents) {
+
+            String eventUri = event.getDataItem().getUri().toString();
+
+            if (eventUri.contains ("/twitter/timeline")) {
+
+                DataMapItem dataItem = DataMapItem.fromDataItem (event.getDataItem());
+                ArrayList <String> tweets = dataItem.getDataMap().getStringArrayList("contents");
+                deviceListener.onTimeLimeReceived(tweets);
+            }
+        }
+    }
+```
+
+####  Protocol:
+
+**To get the timeline in the wearable:**
 
 "/tweets/hi/"					_(Wearable)_	_MessageApi_ 
 "/tweets/state/available"		_(Device)_ 		_MessageApi_
@@ -244,49 +312,81 @@ El protocolo de  comunicación en cuanto al envío es el siguiente:
 "/twitter/timeline"				_(Device)_ 		_DataApi_
 
 
-**Para hacer un retweet:**
+**Retweet a tweet:**
 
 "/tweets/retweet/"					_(Wearable)_	_MessageApi_ 
 "/tweets/operation/ok"				_(Device)_ 		_MessageApi_
 "/tweets/operation/fail"				_(Device)_ 		_MessageApi_
 
 
-**Para hacer un Favorito:**
+**Flag a tweet as favorite:**
 
 "/tweets/favorite/"					_(Wearable)_	_MessageApi_ 
 "/tweets/operation/ok"				_(Device)_ 		_MessageApi_
 "/tweets/operation/fail"			_(Device)_ 		_MessageApi_
 
 
-En cuanto llega el mensaje ```"/tweets/operation/ok"``` se abre una ```ConfirmationActivity``` produciendo el siguente efecto:
+## StreamActivity
 
+After _'WaitActivity'_ do the hard work, the _'StreamActivity'_ will be shown, this one will show a ```GridViewPager```, that view will allow to scroll down seeing the available tweets, scrolling right the user will be able to rewtweet a tweet o flag one as favorite.
 
-IMAGEN
+The ```GridViewPager``` works with a ```FragmentGridAdapter```, that works like the common adapters used in ```ListViews```, ```GridViews```, etc...
 
 ```java
-Intent confirmationActivity = new Intent(getActivity(), ConfirmationActivity.class)
-	.putExtra(ConfirmationActivity.EXTRA_ANIMATION_TYPE, ConfirmationActivity.SUCCESS_ANIMATION)
-	.putExtra(ConfirmationActivity.EXTRA_MESSAGE, actionText.getText()+"ed");
+        ...
+        streamPager = (GridViewPager) findViewById(R.id.stream_pager);
 
-startActivity(confirmationActivity);
+        streamPager.setAdapter(new TwitterAdapter (StreamActivity.this,
+                getFragmentManager(), visibleTweets));
+                
+        ...
+```
+```java
+    class TwitterAdapter extends FragmentGridPagerAdapter {
+        private Context context;
+        private ArrayList<Tweet> tweets;
 
+        public TwitterAdapter(Context context, FragmentManager fm, ArrayList<Tweet> tweets) {
+            super(fm);
+
+            this.tweets = tweets;
+            this.context = context;
+        }
+        
+        @Override
+        public Fragment getFragment(int row, int column) {
+            Tweet currentTweet = tweets.get(row);
+            TwitterActionFragment twitterActionFragment = new TwitterActionFragment();
+
+            if (column == 0) {
+                TweetFragment tf = new TweetFragment();
+                tf.setCardTweet(currentTweet);
+                return tf;
+
+            } else if (column == 1) {
+                twitterActionFragment.setTwAction(TwitterAction.RETWEET);
+
+            } else if (column == 2) {
+                twitterActionFragment.setTwAction(TwitterAction.FAVORITE);
+            }
+
+            twitterActionFragment.setCurrentTweet(currentTweet);
+            return twitterActionFragment;
+        }
+
+        @Override
+        public int getRowCount() {
+            return tweets.size();
+        }
+
+        @Override
+        public int getColumnCount(int row) {
+            return 3;
+        }
+    }
 ```
 
-Es un poco raro el hecho de declarar dicha actividad en el ```Manifest.xml```
-
-```
-...
-<activity android:name="android.support.wearable.activity.ConfirmationActivity"/>
-...
-```
-
-The layout
-
-Despues de pasar 'WaitActivity', se pasa a StreamActivity, esta permite, consultar los tweets del usuario, hacer retweet y marcarlos como favoritos
-
-** __NOTE__ Hay un error conocido conforme a veces se producen errores al hacer retweet después de usar la aplicación varias veces, esto es debido a las keys de twitter, se solucionará en próximos commits
-
-El layout de StreamActivity es el siguiente:
+And the layout
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -307,63 +407,4 @@ El layout de StreamActivity es el siguiente:
 	/>
 </LinearLayout>
 
-```
-
-El GridViewPager, es lo único hay que tener en cuenta, con un simple adaptador podemos asignar un scroll horizontal para cambiar entre fragments de acciones
-
-```java
-...
-streamPager = (GridViewPager) findViewById(R.id.stream_pager);
-
-streamPager.setAdapter(new TwitterAdapter (StreamActivity.this,
-    getFragmentManager(), visibleTweets));
-...
-
-
-class TwitterAdapter extends FragmentGridPagerAdapter {
-	private Context context;
-	private ArrayList<Tweet> tweets;
-
-	public TwitterAdapter(Context context, FragmentManager fm, ArrayList<Tweet> tweets) {
-		super(fm);
-
-		this.tweets = tweets;
-		this.context = context;
-	}
-
-
-	@Override
-	public Fragment getFragment(int row, int column) {
-		Tweet currentTweet = tweets.get(row);
-		TwitterActionFragment twitterActionFragment = new TwitterActionFragment();
-
-		if (column == 0) {
-			TweetFragment tf = new TweetFragment();
-			tf.setCardTweet(currentTweet);
-			return tf;
-
-		} else if (column == 1) {
-			twitterActionFragment.setTwAction(TwitterAction.RETWEET);
-
-		} else if (column == 2) {
-			twitterActionFragment.setTwAction(TwitterAction.FAVORITE);
-		}
-
-		twitterActionFragment.setCurrentTweet(currentTweet);
-		return twitterActionFragment;
-	}
-
-	@Override
-	public int getRowCount() {
-		return tweets.size();
-	}
-
-	@Override
-	public int getColumnCount(int row) {
-	return 3;
-	}
-}
-```
-
-
-
+__NOTE__ _There is a known bug , sometimes the handfeld service is not retweeting and marking a tweet as favorite well, that's because the twitter keys expires. Will be fixed soon_

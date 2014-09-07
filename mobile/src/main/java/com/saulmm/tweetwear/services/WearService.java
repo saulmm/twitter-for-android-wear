@@ -215,6 +215,7 @@ public class WearService extends Service {
         }
     };
 
+
     /**
      * This receiver checks network updates, if it detects no internet
      * a message to the connected wearable will be sent
@@ -226,15 +227,19 @@ public class WearService extends Service {
             String action = intent.getAction();
             boolean noInternetConnection;
 
-            if (action.equals (ConnectivityManager.CONNECTIVITY_ACTION)) {
+            if (action.equals(ConnectivityManager.CONNECTIVITY_ACTION)) {
                 noInternetConnection = intent.getBooleanExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
 
-                Log.d ("[DEBUG] WearService - onReceive", "Connectivity change, is the user connected? "+
+                Log.d("[DEBUG] WearService - onReceive", "Connectivity change, is the user connected? " +
                         !noInternetConnection);
 
                 if (noInternetConnection)
-                    new SendMessageTask (Constants.MSG_NO_ITERNET)
-                        .execute();
+                    new SendMessageTask(Constants.MSG_NO_ITERNET)
+                            .execute();
+
+            } else if ("android.intent.action.BOOT_COMPLETED".equals(intent.getAction())) {
+                Intent startServiceIntent = new Intent(context, WearService.class);
+                context.startService(startServiceIntent);
             }
         }
     };

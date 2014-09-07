@@ -8,13 +8,12 @@ import android.os.Bundle;
 import android.support.wearable.view.DismissOverlayView;
 import android.support.wearable.view.FragmentGridPagerAdapter;
 import android.support.wearable.view.GridViewPager;
-import android.view.GestureDetector;
 
 import com.saulmm.tweetwear.R;
-import com.saulmm.tweetwear.enums.TwitterAction;
-import com.saulmm.tweetwear.fragments.TwitterActionFragment;
 import com.saulmm.tweetwear.data.Tweet;
+import com.saulmm.tweetwear.enums.TwitterAction;
 import com.saulmm.tweetwear.fragments.TweetFragment;
+import com.saulmm.tweetwear.fragments.TwitterActionFragment;
 
 import java.util.ArrayList;
 
@@ -88,7 +87,6 @@ public class StreamActivity extends Activity {
             this.tweets = tweets;
             this.context = context;
         }
-
 
         @Override
         public Fragment getFragment(int row, int column) {
