@@ -89,7 +89,6 @@ private final ConnectionCallbacks gConnectionCallbacks = new ConnectionCallbacks
         [...]
     }
 };
-
 ```
 At this point, the device is ready to communicate with android wear devices if all went well, otherwhise the ```onConnectionFailedListener``` would be fired.
 
@@ -100,8 +99,8 @@ Now we can use the communicate APIs that google provide us, there is 3 APIs to c
 
 La primera comunicación con el wearable trata de averiguar si el servicio está corriendo, es algo parecido a:
 
-_¿Hola, estás ahí?  _
-_Aqui estoy, adelante _<br>
+_Hi yo !  _
+_Here I am :) _<br>
 
 En el lenguaje de wear:
 
@@ -111,7 +110,7 @@ En el lenguaje de wear:
 Después de esto el _wearable_ ya sabe que hay el servicio esta disponible para poder pedir la lista de tweets del usuario. Para mandar mensajes, tanto en el _wearable_ como en el _device_ he usado la misma implementación de una _asynctask_
 
 
-```
+```java
 class SendMessageTask extends AsyncTask <Void, Void, Void> {
 
    private final String message;
@@ -139,7 +138,7 @@ class SendMessageTask extends AsyncTask <Void, Void, Void> {
 
 After call to ```googleApiClient()```and wait to ```onConnected()``` were called, we registered to receive message events using the ```Wear.MessageListener.addListener(myListener)``` method, so we are able to manage the messages with this method
 
-```
+```java
 private final MessageApi.MessageListener wearMessageListener = new MessageApi.MessageListener() {
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
@@ -162,8 +161,7 @@ To send & receive the tweets from the handfeld to the wear device, y used DataMa
 
 In this case, I have implemented an _asynctask_ for send the twitter timeline after receiving with _twitter4_. The timelien is sent as a ```ArrayList<String>```
 
-````
-
+```java
 class SendTimeLineTask  extends AsyncTask<Void, Void, Void> {
 
     private final ArrayList <String>  contents;
@@ -190,7 +188,6 @@ class SendTimeLineTask  extends AsyncTask<Void, Void, Void> {
     return null;
     }
 }
-
 ```
 
 ### 4.Wearable app
@@ -234,7 +231,7 @@ If there is any problem the 'Loading...' message will turn to show the error and
 
 ![](https://919c5da1a105a3a06e03fa4ec2c9901a70398228.googledrive.com/host/0B62SZ3WRM2R2TXNNWlJPREVXQTA)
 
-```
+```xml
 <?xml version="1.0" encoding="UTF-8"?>
 <transition xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:drawable="@drawable/wait_idle" />
@@ -242,7 +239,7 @@ If there is any problem the 'Loading...' message will turn to show the error and
 </transition>
 ```
 
-```
+```java
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     ...
     android:background="@drawable/tr_error"
@@ -258,7 +255,7 @@ If the handfeld app responds successfully the wearable will sent another message
 
 The wear message listener...
 
-```
+```java
   @Override
     public void onMessageReceived(MessageEvent messageEvent) {
 
@@ -284,7 +281,7 @@ The wear message listener...
   
 The tweets message listener (DataListener):
 
-```
+```java
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
 
@@ -306,23 +303,23 @@ The tweets message listener (DataListener):
 
 **To get the timeline in the wearable:**
 
-"/tweets/hi/"					_(Wearable)_	_MessageApi_ 
-"/tweets/state/available"		_(Device)_ 		_MessageApi_
-"/twitter/timeline"				_(Wearable)_ 	_MessageApi_
+"/tweets/hi/"					_(Wearable)_	_MessageApi_  <br>
+"/tweets/state/available"		_(Device)_ 		_MessageApi_ <br>
+"/twitter/timeline"				_(Wearable)_ 	_MessageApi_ <br>
 "/twitter/timeline"				_(Device)_ 		_DataApi_
 
-
+<br>
 **Retweet a tweet:**
 
-"/tweets/retweet/"					_(Wearable)_	_MessageApi_ 
-"/tweets/operation/ok"				_(Device)_ 		_MessageApi_
+"/tweets/retweet/"					_(Wearable)_	_MessageApi_ <br>
+"/tweets/operation/ok"				_(Device)_ 		_MessageApi_<br>
 "/tweets/operation/fail"				_(Device)_ 		_MessageApi_
 
-
+<br>
 **Flag a tweet as favorite:**
 
-"/tweets/favorite/"					_(Wearable)_	_MessageApi_ 
-"/tweets/operation/ok"				_(Device)_ 		_MessageApi_
+"/tweets/favorite/"					_(Wearable)_	_MessageApi_ <br>
+"/tweets/operation/ok"				_(Device)_ 		_MessageApi_<br>
 "/tweets/operation/fail"			_(Device)_ 		_MessageApi_
 
 
