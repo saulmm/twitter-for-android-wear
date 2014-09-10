@@ -1,5 +1,7 @@
 # Twitter client for android wear
 
+<div style="text-align:center"><img src ="https://googledrive.com/host/0B62SZ3WRM2R2RURpRkhYdG5PZjg" /></div>
+
 ## 1. Motivation
 
 The motivation of this project was to learn how the android wear framework works, using theirs views, communication APIs, etc...
