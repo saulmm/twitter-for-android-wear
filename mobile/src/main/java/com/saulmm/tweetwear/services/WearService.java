@@ -26,11 +26,8 @@ import com.google.android.gms.wearable.Wearable;
 import com.saulmm.tweetwear.Config;
 import com.saulmm.tweetwear.Constants;
 import com.saulmm.tweetwear.activities.MainActivity;
-import com.saulmm.tweetwear.helpers.TwitterHelperListener;
-import com.saulmm.tweetwear.helpers.tasks.GetAuthorizationUrlTask;
 import com.saulmm.tweetwear.helpers.tasks.GetNodesTask;
 import com.saulmm.tweetwear.helpers.tasks.GetTwitterTimeline;
-import com.saulmm.tweetwear.helpers.tasks.SaveAccessTokenTask;
 import com.saulmm.tweetwear.listeners.TimeLineListener;
 import com.saulmm.tweetwear.listeners.wear.ServiceNodeListener;
 
@@ -38,68 +35,28 @@ import java.util.ArrayList;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterFactory;
-import twitter4j.auth.RequestToken;
 import twitter4j.conf.ConfigurationBuilder;
 
-import static com.google.android.gms.common.api.GoogleApiClient.*;
+import static com.google.android.gms.common.api.GoogleApiClient.Builder;
+import static com.google.android.gms.common.api.GoogleApiClient.ConnectionCallbacks;
+import static com.google.android.gms.common.api.GoogleApiClient.OnConnectionFailedListener;
 
 
 public class WearService extends Service {
 
-    private final LocalBinder localBinder = new LocalBinder();
     private GoogleApiClient googleApiClient;
     private ArrayList<Node> connectedNodes;
     private boolean isConnected;
 
-
     // Twitter stuff
     private Twitter twitterClient;
-    private RequestToken requestToken;
-    private String oauthVerifier;
 
     // Other stuff
     private SharedPreferences preferences;
 
-    // Twitter listener
-    private TwitterHelperListener listener;
-
-    public void setRequestToken(RequestToken requestToken) {
-        this.requestToken = requestToken;
-    }
-
     // Tasks
     private AsyncTask <Void, Void, String> authorizationURLTask;
     private AsyncTask <Void, Void, String> accessTokenTask;
-
-
-    public void setOauthVerifier (String oauthVerifier) {
-        this.oauthVerifier = oauthVerifier;
-    }
-
-
-    public void setListener (TwitterHelperListener listener) {
-        this.listener = listener;
-    }
-
-
-    /**
-     * Executes the task to retrieve the authorization Url
-     */
-    public void startAuthorizationUrlTask () {
-
-        authorizationURLTask =  new GetAuthorizationUrlTask(twitterClient, listener).execute();
-    }
-
-
-    /**
-     * Executes the task to retrieve the access token
-     */
-    public void startAccessTokenTask () {
-
-        accessTokenTask = new SaveAccessTokenTask (
-            this, twitterClient, listener, requestToken, oauthVerifier
-        ).execute();
-    }
 
 
     public boolean isConnected() {
@@ -150,10 +107,12 @@ public class WearService extends Service {
         preferences = getSharedPreferences(MainActivity.PREFS,
             Context.MODE_PRIVATE);
 
-        // Init Twitter
-        initTwitter();
-
         registerForNetworkChanges();
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return null;
     }
 
 
@@ -168,28 +127,9 @@ public class WearService extends Service {
     }
 
 
-    /**
-     * Start a twitter client instance
-     */
-    public void initTwitter() {
-        twitterClient = new TwitterFactory().getInstance();
-        twitterClient.setOAuthConsumer(
-            Config.CONSUMER_KEY,
-            Config.CONSUMER_SECRET);
-    }
-
-
-    @Override
-    public IBinder onBind(Intent intent) {
-        return localBinder;
-    }
-
-
     public GoogleApiClient getGoogleApiClient() {
         return googleApiClient;
     }
-
-
 
 
     public void addNodeApiListener (NodeApi.NodeListener listener) {

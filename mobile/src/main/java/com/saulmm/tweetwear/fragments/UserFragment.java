@@ -22,10 +22,9 @@ import android.widget.TextView;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.saulmm.tweetwear.R;
-import com.saulmm.tweetwear.Utils;
 import com.saulmm.tweetwear.activities.MainActivity;
-import com.saulmm.tweetwear.listeners.wear.ServiceNodeListener;
 import com.saulmm.tweetwear.helpers.tasks.GetNodesTask;
+import com.saulmm.tweetwear.listeners.wear.ServiceNodeListener;
 import com.saulmm.tweetwear.services.WearService;
 import com.squareup.picasso.Picasso;
 
@@ -47,12 +46,13 @@ public class UserFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        preferences = getActivity().getSharedPreferences(MainActivity.PREFS,
-                Context.MODE_PRIVATE);
+        preferences = getActivity().getSharedPreferences(
+            MainActivity.PREFS,
+            Context.MODE_PRIVATE);
 
         View rootView = initUI(inflater);
 
-        Utils.startServiceIfNeccessary(getActivity());
+//        Utils.startServiceIfNeccessary(getActivity());
 
         return rootView;
     }
@@ -76,18 +76,20 @@ public class UserFragment extends Fragment
             .into(profileImg);
 
         String backgroundURL = preferences.getString("BACKGROUND_IMG", "");
+
         if (!backgroundURL.equals("")) {
 
             Picasso.with(getActivity())
-                    .load(backgroundURL)
-                    .placeholder(R.drawable.background)
-                    .error(R.drawable.background)
-                    .into(userBackground);
+                .load(backgroundURL)
+                .placeholder(R.drawable.background)
+                .error(R.drawable.background)
+                .into(userBackground);
         }
 
         nameTv.setText (preferences.getString("NAME", ""));
         usernameTv.setText ("@"+preferences.getString("USER_NAME", ""));
         revokeButton.setOnClickListener(onClickListener);
+
         return rootView;
     }
 
@@ -99,12 +101,11 @@ public class UserFragment extends Fragment
             new Intent (getActivity(),
             WearService.class));
 
-        doBindService();
+//        doBindService();
 
         if (wearService != null) {
             wearService.addNodeApiListener(this);
             Log.d ("[DEBUG] UserFragment - onResume", "Node listener added");
-
         }
     }
 
@@ -144,11 +145,7 @@ public class UserFragment extends Fragment
             Log.i("[INFO] UserFragment - onServiceConnected", "Service connected");
             Log.d ("[DEBUG] UserFragment - onServiceConnected", "Is connected ? "+wearService.isConnected());
 
-
             new GetNodesTask(nodeListener, wearService.getGoogleApiClient()).execute();
-
-
-
         }
 
 

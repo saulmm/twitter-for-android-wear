@@ -37,8 +37,8 @@ public class SaveAccessTokenTask extends AsyncTask <Void, Void, String> {
         this.errorMessage = "";
 
         preferences = context.getSharedPreferences(
-                MainActivity.PREFS,
-                Context.MODE_PRIVATE);
+            MainActivity.PREFS,
+            Context.MODE_PRIVATE);
     }
 
     @Override
