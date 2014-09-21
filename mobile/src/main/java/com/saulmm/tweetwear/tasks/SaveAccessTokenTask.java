@@ -1,11 +1,11 @@
-package com.saulmm.tweetwear.helpers.tasks;
+package com.saulmm.tweetwear.tasks;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.saulmm.tweetwear.activities.MainActivity;
+import com.saulmm.tweetwear.Constants;
 import com.saulmm.tweetwear.helpers.TwitterHelperListener;
 
 import twitter4j.Twitter;
@@ -37,7 +37,7 @@ public class SaveAccessTokenTask extends AsyncTask <Void, Void, String> {
         this.errorMessage = "";
 
         preferences = context.getSharedPreferences(
-            MainActivity.PREFS,
+            Constants.PREFS,
             Context.MODE_PRIVATE);
     }
 
@@ -49,11 +49,10 @@ public class SaveAccessTokenTask extends AsyncTask <Void, Void, String> {
             AccessToken aToken = twClient.getOAuthAccessToken (rToken, verifier);
             User twUser = twClient.showUser (aToken.getUserId());
 
-            fillPrefWithTwitterData (twUser, aToken.getToken(),
-                aToken.getTokenSecret());
+            fillPrefWithTwitterData(twUser, aToken.getToken(),
+                    aToken.getTokenSecret());
 
         } catch (TwitterException e) {
-
 
             Log.e("[ERROR] SaveAccessTokenTask - doInBackground",
                     "Message: " + e.getMessage());
@@ -85,8 +84,12 @@ public class SaveAccessTokenTask extends AsyncTask <Void, Void, String> {
         prefEditor.putString("NAME", user.getName());
         prefEditor.putString("USER_NAME", user.getScreenName());
         prefEditor.putString("IMAGE_URL", user.getOriginalProfileImageURL());
+
+        prefEditor.putString("CONSUMER_KEY", Constants.CONSUMER_KEY);
+        prefEditor.putString("CONSUMER_SECRET", Constants.CONSUMER_SECRET);
         prefEditor.putString("ACCESS_TOKEN", aToken);
         prefEditor.putString("ACCESS_TOKEN_SECRET", aTokenSecret);
+
         prefEditor.putString("BACKGROUND_IMG", user.getProfileBackgroundImageURL());
 
         prefEditor.apply();

@@ -25,11 +25,8 @@ import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 import com.saulmm.tweetwear.Config;
 import com.saulmm.tweetwear.Constants;
-import com.saulmm.tweetwear.activities.MainActivity;
-import com.saulmm.tweetwear.helpers.tasks.GetNodesTask;
-import com.saulmm.tweetwear.helpers.tasks.GetTwitterTimeline;
 import com.saulmm.tweetwear.listeners.TimeLineListener;
-import com.saulmm.tweetwear.listeners.wear.ServiceNodeListener;
+import com.saulmm.tweetwear.tasks.GetTwitterTimeline;
 
 import java.util.ArrayList;
 
@@ -104,7 +101,7 @@ public class WearService extends Service {
                 "Wear service started");
 
         // Init preferences
-        preferences = getSharedPreferences(MainActivity.PREFS,
+        preferences = getSharedPreferences(Constants.PREFS,
             Context.MODE_PRIVATE);
 
         registerForNetworkChanges();
@@ -141,7 +138,6 @@ public class WearService extends Service {
         @Override
         public void onConnected(Bundle bundle) {
 
-            new GetNodesTask (nodeListener, googleApiClient).execute();
             Wearable.MessageApi.addListener (googleApiClient, wearMessageListener);
 
             Log.i ("[INFO] WearService - onConnected", "Message listener added...");
@@ -195,26 +191,6 @@ public class WearService extends Service {
         }
     };
 
-    private final ServiceNodeListener nodeListener = new ServiceNodeListener() {
-
-        @Override
-        public void onNodesReceived(ArrayList<Node> wearNodes) {
-
-            WearService.this.connectedNodes = wearNodes;
-            isConnected = !connectedNodes.isEmpty();
-            
-            Log.i ("[INFO] WearService - onNodesReceived", 
-                "Wearable connected flag: "+isConnected);
-        }
-
-
-        @Override
-        public void onFailedNodes() {
-
-            Log.e ("[ERROR] WearService - onFailedNodes",
-                "There has been a problem getting the connected nodes");
-        }
-    };
 
 
     class SendMessageTask extends AsyncTask <Void, Void, Void> {
@@ -248,10 +224,6 @@ public class WearService extends Service {
             return null;
         }
     }
-
-
-
-
 
     class SendDataCoolTask  extends AsyncTask<Void, Void, Void> {
 
@@ -345,12 +317,6 @@ public class WearService extends Service {
                 } catch (NullPointerException e) {
                     Log.e ("[ERROR] WearService - onMessageReceived",
                             ""+msg+ " - "+e.getMessage());
-
-                    new GetNodesTask (nodeListener, googleApiClient).execute();
-                    new SendMessageTask(Constants.MSG_AVAILABLE).execute();
-
-
-
                 }
             }
         }

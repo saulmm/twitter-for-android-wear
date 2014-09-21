@@ -4,8 +4,8 @@ package com.saulmm.tweetwear.helpers;
 import android.content.Context;
 
 import com.saulmm.tweetwear.Config;
-import com.saulmm.tweetwear.helpers.tasks.GetAuthorizationUrlTask;
-import com.saulmm.tweetwear.helpers.tasks.SaveAccessTokenTask;
+import com.saulmm.tweetwear.tasks.GetAuthorizationUrlTask;
+import com.saulmm.tweetwear.tasks.SaveAccessTokenTask;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterFactory;

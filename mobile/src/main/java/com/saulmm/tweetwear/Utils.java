@@ -16,28 +16,6 @@ public class Utils {
     private static final String LINK_REG_EXP = "((https?|ftp|gopher|telnet|file|Unsure|http):((//)|(\\\\))+[\\w\\d:#@%/;$()~_?\\+-=\\\\\\.&]*)";
 
 
-    private static  boolean isMyServiceRunning(Class<?> serviceClass, Context context) {
-
-        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-
-        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
-
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-    public static void startServiceIfNeccessary(Context context) {
-        if (!isMyServiceRunning(WearService.class, context)) {
-
-            context.startService(new Intent(context, WearService.class));
-        }
-    }
-
-
     public static String removeUrl (String urlIstring) {
 
         String urlPattern = LINK_REG_EXP;
@@ -72,7 +50,6 @@ public class Utils {
 
         //milliseconds
         long different = endDate.getTime() - startDate.getTime();
-
 
         long secondsInMilli = 1000;
         long minutesInMilli = secondsInMilli * 60;

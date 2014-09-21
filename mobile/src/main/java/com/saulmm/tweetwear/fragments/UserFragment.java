@@ -13,7 +13,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -21,14 +20,10 @@ import android.widget.TextView;
 
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
+import com.saulmm.tweetwear.Constants;
 import com.saulmm.tweetwear.R;
-import com.saulmm.tweetwear.activities.MainActivity;
-import com.saulmm.tweetwear.helpers.tasks.GetNodesTask;
-import com.saulmm.tweetwear.listeners.wear.ServiceNodeListener;
 import com.saulmm.tweetwear.services.WearService;
 import com.squareup.picasso.Picasso;
-
-import java.util.ArrayList;
 
 
 public class UserFragment extends Fragment
@@ -47,7 +42,7 @@ public class UserFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
         preferences = getActivity().getSharedPreferences(
-            MainActivity.PREFS,
+            Constants.PREFS,
             Context.MODE_PRIVATE);
 
         View rootView = initUI(inflater);
@@ -56,6 +51,27 @@ public class UserFragment extends Fragment
 
         return rootView;
     }
+
+
+    private ServiceConnection myConnection = new ServiceConnection() {
+
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            
+            
+            Log.d ("[DEBUG] UserFragment - onServiceConnected", "GDE - Popopop");
+        }
+
+        public void onServiceDisconnected(ComponentName arg0) {
+            isBound = false;
+            
+            
+            Log.d ("[DEBUG] UserFragment - onServiceDisconnected", "GDE - Popopop");
+            
+        }
+
+    };
+    
 
     private View initUI(LayoutInflater inflater) {
         View rootView = inflater.inflate(R.layout.fragment_user, null);
@@ -144,8 +160,6 @@ public class UserFragment extends Fragment
             wearService = ((WearService.LocalBinder) service).getService();
             Log.i("[INFO] UserFragment - onServiceConnected", "Service connected");
             Log.d ("[DEBUG] UserFragment - onServiceConnected", "Is connected ? "+wearService.isConnected());
-
-            new GetNodesTask(nodeListener, wearService.getGoogleApiClient()).execute();
         }
 
 
@@ -157,28 +171,28 @@ public class UserFragment extends Fragment
         }
     };
 
-    private final ServiceNodeListener nodeListener = new ServiceNodeListener() {
-        @Override
-        public void onNodesReceived(ArrayList<Node> wearNodes) {
-            Log.d ("[DEBUG] UserFragment - onNodesReceived", "Nodes received...");
-            hintTv.setText(getString(R.string.connected_wearable_message));
-            hintIconImg.setImageResource(R.drawable.ok);
-
-            hintHolderLn.setVisibility(View.VISIBLE);
-            hintHolderLn.startAnimation(AnimationUtils
-                    .loadAnimation(getActivity(), R.anim.alpha_on));
-        }
-
-        @Override
-        public void onFailedNodes() {
-            hintIconImg.setImageResource(R.drawable.error);
-            hintTv.setText( getString(R.string.disconnected_wearable));
-
-            hintHolderLn.setVisibility(View.VISIBLE);
-            hintHolderLn.startAnimation(AnimationUtils
-                    .loadAnimation(getActivity(), R.anim.alpha_on));
-        }
-    };
+//    private final ServiceNodeListener nodeListener = new ServiceNodeListener() {
+//        @Override
+//        public void onNodesReceived(ArrayList<Node> wearNodes) {
+//            Log.d ("[DEBUG] UserFragment - onNodesReceived", "Nodes received...");
+//            hintTv.setText(getString(R.string.connected_wearable_message));
+//            hintIconImg.setImageResource(R.drawable.ok);
+//
+//            hintHolderLn.setVisibility(View.VISIBLE);
+//            hintHolderLn.startAnimation(AnimationUtils
+//                    .loadAnimation(getActivity(), R.anim.alpha_on));
+//        }
+//
+//        @Override
+//        public void onFailedNodes() {
+//            hintIconImg.setImageResource(R.drawable.error);
+//            hintTv.setText( getString(R.string.disconnected_wearable));
+//
+//            hintHolderLn.setVisibility(View.VISIBLE);
+//            hintHolderLn.startAnimation(AnimationUtils
+//                    .loadAnimation(getActivity(), R.anim.alpha_on));
+//        }
+//    };
 
 
     private void doBindService () {

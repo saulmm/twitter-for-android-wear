@@ -1,4 +1,4 @@
-package com.saulmm.tweetwear.helpers.tasks;
+package com.saulmm.tweetwear.tasks;
 
 
 import android.os.AsyncTask;

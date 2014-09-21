@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -20,7 +21,6 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.saulmm.tweetwear.R;
-import com.saulmm.tweetwear.Utils;
 import com.saulmm.tweetwear.helpers.TwitterHelper;
 import com.saulmm.tweetwear.helpers.TwitterHelperListener;
 
@@ -37,17 +37,23 @@ public class LoginFragment extends Fragment implements TwitterHelperListener {
     private Button twitterLoginFragmentButton;
     private ProgressDialog pDialog;
 
+    private Context ctx;
+
     // Other stuff
     private boolean authOk;
 
-
     private TwitterHelper twHelper;
 
+    public void setCtx(Context ctx) {
+        this.ctx = ctx;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) { }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        Utils.startServiceIfNeccessary (getActivity());
         View rootView = initUI(inflater);
 
         twHelper = new TwitterHelper();
@@ -71,6 +77,7 @@ public class LoginFragment extends Fragment implements TwitterHelperListener {
         errorMessageTv              = (TextView) rootView.findViewById(R.id.tw_login_error_msg);
 
         twitterLoginFragmentButton.setOnClickListener(onClickTwitterListener);
+
         return rootView;
     }
 
@@ -155,7 +162,6 @@ public class LoginFragment extends Fragment implements TwitterHelperListener {
             webview.loadUrl("file://android_asset/index.html");
             webview.loadUrl(url);
             webview.setWebViewClient(oauthWebClient);
-
 
             authDialog.show();
             authDialog.setCancelable(true);
