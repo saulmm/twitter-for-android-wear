@@ -33,7 +33,6 @@ public class GetAuthorizationUrlTask extends AsyncTask <Void, Void, String> {
     protected String doInBackground(Void... params) {
 
         try {
-
             rToken = twitterClient.getOAuthRequestToken();
             authorizationURL = rToken.getAuthorizationURL();
 

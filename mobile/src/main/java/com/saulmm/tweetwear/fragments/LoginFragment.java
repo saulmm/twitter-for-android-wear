@@ -204,13 +204,11 @@ public class LoginFragment extends Fragment implements TwitterHelperListener {
         twitterLoginFragmentButton.setEnabled(false);
         pDialog.dismiss();
 
-
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.content_frame, new UserFragment());
         ft.setTransition(FragmentTransaction.TRANSIT_ENTER_MASK);
         ft.remove(LoginFragment.this);
         ft.commit();
-
     }
 
     @Override

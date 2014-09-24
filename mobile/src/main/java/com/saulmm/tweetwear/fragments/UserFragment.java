@@ -119,17 +119,10 @@ public class UserFragment extends Fragment
 
 //        doBindService();
 
-        if (wearService != null) {
-            wearService.addNodeApiListener(this);
-            Log.d ("[DEBUG] UserFragment - onResume", "Node listener added");
-        }
-    }
-
-    @Override
-    public void onPause() {
-
-        super.onPause();
-        doUnbindService();
+//        if (wearService != null) {
+//            wearService.addNodeApiListener(this);
+//            Log.d ("[DEBUG] UserFragment - onResume", "Node listener added");
+//        }
     }
 
 
@@ -149,69 +142,6 @@ public class UserFragment extends Fragment
         ft.commit();
         }
     };
-
-
-    // Binder to maintain a conversation with the wear & twitter service
-    private final ServiceConnection mConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-
-            wearService = ((WearService.LocalBinder) service).getService();
-            Log.i("[INFO] UserFragment - onServiceConnected", "Service connected");
-            Log.d ("[DEBUG] UserFragment - onServiceConnected", "Is connected ? "+wearService.isConnected());
-        }
-
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-
-            wearService = null;
-            Log.i ("[INFO] UserFragment - onServiceDisconnected", "Service disconnected");
-        }
-    };
-
-//    private final ServiceNodeListener nodeListener = new ServiceNodeListener() {
-//        @Override
-//        public void onNodesReceived(ArrayList<Node> wearNodes) {
-//            Log.d ("[DEBUG] UserFragment - onNodesReceived", "Nodes received...");
-//            hintTv.setText(getString(R.string.connected_wearable_message));
-//            hintIconImg.setImageResource(R.drawable.ok);
-//
-//            hintHolderLn.setVisibility(View.VISIBLE);
-//            hintHolderLn.startAnimation(AnimationUtils
-//                    .loadAnimation(getActivity(), R.anim.alpha_on));
-//        }
-//
-//        @Override
-//        public void onFailedNodes() {
-//            hintIconImg.setImageResource(R.drawable.error);
-//            hintTv.setText( getString(R.string.disconnected_wearable));
-//
-//            hintHolderLn.setVisibility(View.VISIBLE);
-//            hintHolderLn.startAnimation(AnimationUtils
-//                    .loadAnimation(getActivity(), R.anim.alpha_on));
-//        }
-//    };
-
-
-    private void doBindService () {
-
-
-        getActivity().bindService(new Intent(getActivity(), WearService.class),
-                mConnection, Context.BIND_AUTO_CREATE);
-
-        isBound = true;
-    }
-
-    private void doUnbindService () {
-
-        if (isBound) {
-            getActivity().unbindService(mConnection);
-
-            isBound = false;
-        }
-    }
 
 
     @Override

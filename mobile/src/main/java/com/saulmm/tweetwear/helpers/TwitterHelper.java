@@ -2,35 +2,64 @@ package com.saulmm.tweetwear.helpers;
 
 
 import android.content.Context;
+import android.text.TextUtils;
 
 import com.saulmm.tweetwear.Config;
+import com.saulmm.tweetwear.Constants;
 import com.saulmm.tweetwear.tasks.GetAuthorizationUrlTask;
 import com.saulmm.tweetwear.tasks.SaveAccessTokenTask;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterFactory;
+import twitter4j.auth.AccessToken;
 import twitter4j.auth.RequestToken;
 
 public class TwitterHelper {
 
     private Context context;
-    private Twitter twitterClient;
+    private Twitter twClient;
     private TwitterHelperListener listener;
     private RequestToken requestToken;
     private String oauthVerifier;
 
 
+    public TwitterHelper () {}
+
+    public TwitterHelper(String aToken, String aTokenSecret) {
+
+        if (!TextUtils.isEmpty(Constants.CONSUMER_KEY) && !TextUtils.isEmpty(Constants.CONSUMER_SECRET) &&
+            !TextUtils.isEmpty(aToken) && !TextUtils.isEmpty(aTokenSecret)) {
+
+            AccessToken accToken = new AccessToken(aToken, aTokenSecret);
+
+            twClient = new TwitterFactory().getInstance();
+
+            // Authorize twitter client
+            twClient.setOAuthConsumer(Constants.CONSUMER_KEY, Constants.CONSUMER_SECRET);
+            twClient.setOAuthAccessToken(accToken);
+
+        } else {
+
+            twClient = null;
+        }
+    }
+
+
+    public void setTwClient(Twitter twClient) {
+        this.twClient = twClient;
+    }
 
     /**
      * Start a twitter client instance
      */
+    // TODO: review this
     public void initTwitter() {
 
-        twitterClient = new TwitterFactory().getInstance();
+        twClient = new TwitterFactory().getInstance();
 
-        twitterClient.setOAuthConsumer(
-            Config.CONSUMER_KEY,
-            Config.CONSUMER_SECRET);
+        twClient.setOAuthConsumer(
+                Config.CONSUMER_KEY,
+                Config.CONSUMER_SECRET);
     }
 
     /**
@@ -38,7 +67,7 @@ public class TwitterHelper {
      */
     public void startAuthorizationUrlTask () {
 
-        new GetAuthorizationUrlTask(twitterClient, listener).execute();
+        new GetAuthorizationUrlTask(twClient, listener).execute();
     }
 
 
@@ -47,7 +76,7 @@ public class TwitterHelper {
      */
     public void startAccessTokenTask () {
 
-        new SaveAccessTokenTask(context, twitterClient, listener, requestToken, oauthVerifier)
+        new SaveAccessTokenTask(context, twClient, listener, requestToken, oauthVerifier)
             .execute();
     }
 
@@ -67,6 +96,10 @@ public class TwitterHelper {
         this.oauthVerifier = oauthVerifier;
     }
 
+
+    public Twitter getTwClient() {
+        return twClient;
+    }
 
     public void setRequestToken(RequestToken requestToken) {
 
