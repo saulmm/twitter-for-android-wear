@@ -9,9 +9,8 @@ import android.util.Log;
 import com.saulmm.tweetwear.Config;
 import com.saulmm.tweetwear.Constants;
 import com.saulmm.tweetwear.Utils;
-import com.saulmm.tweetwear.listeners.TimeLineListener;
+import com.saulmm.tweetwear.tasks.GetAccessTokenTask;
 import com.saulmm.tweetwear.tasks.GetAuthorizationUrlTask;
-import com.saulmm.tweetwear.tasks.SaveAccessTokenTask;
 
 import java.util.ArrayList;
 
@@ -26,7 +25,10 @@ public class TwitterHelper {
 
     private Context context;
     private Twitter twClient;
-    private TwitterHelperListener listener;
+
+    private TwitterLoginListener loginListener;
+    private TwitterOperationListener twitterListener;
+
     private RequestToken requestToken;
     private String oauthVerifier;
 
@@ -53,10 +55,6 @@ public class TwitterHelper {
     }
 
 
-    public void setTwClient(Twitter twClient) {
-        this.twClient = twClient;
-    }
-
     /**
      * Start a twitter client instance
      */
@@ -70,32 +68,31 @@ public class TwitterHelper {
                 Config.CONSUMER_SECRET);
     }
 
-    /**
-     * Executes the task to retrieve the authorization Url
-     */
-    public void startAuthorizationUrlTask () {
 
-        new GetAuthorizationUrlTask(twClient, listener).execute();
+    public void requestAuthorizationUrl() {
+
+        new GetAuthorizationUrlTask(twClient, loginListener).execute();
     }
 
+    public void requestTwitterTimeLine (TwitterOperationListener twitterListener) {
 
-    /**
-     * Executes the task to retrieve the access token
-     */
-    public void startAccessTokenTask () {
+        new TwitterTimeLineTask(twitterListener).execute();
+    }
 
-        new SaveAccessTokenTask(context, twClient, listener, requestToken, oauthVerifier)
+    public void requestAccessToken() {
+
+        new GetAccessTokenTask(context, twClient, loginListener, requestToken, oauthVerifier)
             .execute();
     }
 
+    public void retweet (String tweetID) {
 
-    public void setListener (TwitterHelperListener listener) {
-        this.listener = listener;
+        new TwitterOperationTask(tweetID).execute(true);
     }
 
+    public void markTweetAsFavorite (String tweetID) {
 
-    public void setContext(Context context) {
-        this.context = context;
+        new TwitterOperationTask(tweetID).execute(false);
     }
 
 
@@ -109,18 +106,22 @@ public class TwitterHelper {
         this.requestToken = requestToken;
     }
 
-    public void requestTwitterTimeLine (TimeLineListener timeLineListener) {
-        new TwitterTimeLineTask(timeLineListener).execute();
+
+    public void setLoginListener(TwitterLoginListener loginListener) {
+        this.loginListener = loginListener;
     }
 
+    public void setTwitterListener(TwitterOperationListener twitterListener) {
+        this.twitterListener = twitterListener;
+    }
 
     private class TwitterTimeLineTask extends AsyncTask<Void, Void, ArrayList<Status>> {
 
         private String errorMessage;
-        private final TimeLineListener tmListener;
+        private final TwitterOperationListener tmListener;
 
 
-        public TwitterTimeLineTask (TimeLineListener tmListener) {
+        public TwitterTimeLineTask (TwitterOperationListener tmListener) {
 
             this.tmListener = tmListener;
         }
@@ -180,10 +181,46 @@ public class TwitterHelper {
 
             } else {
 
-                tmListener.onTimeLineFailed(errorMessage);
+                tmListener.onTwitterFail(errorMessage);
+            }
+        }
+    }
+
+    private class TwitterOperationTask extends AsyncTask <Boolean, Void, Boolean> {
+        private final String tweetID;
+        private boolean isARetweet;
+
+        public TwitterOperationTask(String tweetID) {
+            this.tweetID = tweetID;
+        }
+
+        @Override
+        protected Boolean doInBackground(Boolean... isRetweet) {
+
+            try {
+                long id = Long.parseLong(tweetID);
+                isARetweet = isRetweet[0];
+
+                if (isARetweet)
+                    twClient.retweetStatus(id);
+
+                else
+                    twClient.createFavorite(id);
+
+            } catch (Exception e) {
+
+                twitterListener.onTwitterFail(e.getMessage());
+                return false;
             }
 
+            return true;
+        }
 
+        @Override
+        protected void onPostExecute(Boolean operationSuccessfully) {
+
+            super.onPostExecute(operationSuccessfully);
+            twitterListener.onTwitterOperationSuccess(isARetweet);
         }
     }
 

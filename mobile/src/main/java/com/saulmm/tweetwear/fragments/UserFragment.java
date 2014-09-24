@@ -2,13 +2,9 @@ package com.saulmm.tweetwear.fragments;
 
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,7 +18,6 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.saulmm.tweetwear.Constants;
 import com.saulmm.tweetwear.R;
-import com.saulmm.tweetwear.services.WearService;
 import com.squareup.picasso.Picasso;
 
 
@@ -32,8 +27,6 @@ public class UserFragment extends Fragment
     private SharedPreferences preferences;
 
     // Service
-    private WearService wearService;
-    private boolean isBound;
     private LinearLayout hintHolderLn;
     private ImageView hintIconImg;
     private TextView hintTv;
@@ -46,32 +39,8 @@ public class UserFragment extends Fragment
             Context.MODE_PRIVATE);
 
         View rootView = initUI(inflater);
-
-//        Utils.startServiceIfNeccessary(getActivity());
-
         return rootView;
     }
-
-
-    private ServiceConnection myConnection = new ServiceConnection() {
-
-        public void onServiceConnected(ComponentName className,
-                                       IBinder service) {
-            
-            
-            Log.d ("[DEBUG] UserFragment - onServiceConnected", "GDE - Popopop");
-        }
-
-        public void onServiceDisconnected(ComponentName arg0) {
-            isBound = false;
-            
-            
-            Log.d ("[DEBUG] UserFragment - onServiceDisconnected", "GDE - Popopop");
-            
-        }
-
-    };
-    
 
     private View initUI(LayoutInflater inflater) {
         View rootView = inflater.inflate(R.layout.fragment_user, null);
@@ -109,37 +78,21 @@ public class UserFragment extends Fragment
         return rootView;
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-
-        getActivity().startService(
-            new Intent (getActivity(),
-            WearService.class));
-
-//        doBindService();
-
-//        if (wearService != null) {
-//            wearService.addNodeApiListener(this);
-//            Log.d ("[DEBUG] UserFragment - onResume", "Node listener added");
-//        }
-    }
-
 
     private final View.OnClickListener onClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
 
-        SharedPreferences.Editor prefEditor = preferences.edit();
-        prefEditor.putString("ACCESS_TOKEN", "");
-        prefEditor.putString("ACCESS_TOKEN_SECRET", "");
-        prefEditor.commit();
+            SharedPreferences.Editor prefEditor = preferences.edit();
+            prefEditor.putString("ACCESS_TOKEN", "");
+            prefEditor.putString("ACCESS_TOKEN_SECRET", "");
+            prefEditor.commit();
 
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.replace(R.id.content_frame, new LoginFragment());
-        ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-        ft.remove(UserFragment.this);
-        ft.commit();
+            FragmentTransaction ft = getFragmentManager().beginTransaction();
+            ft.replace(R.id.content_frame, new LoginFragment());
+            ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+            ft.remove(UserFragment.this);
+            ft.commit();
         }
     };
 

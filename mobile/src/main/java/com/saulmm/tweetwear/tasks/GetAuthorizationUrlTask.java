@@ -3,7 +3,7 @@ package com.saulmm.tweetwear.tasks;
 import android.os.AsyncTask;
 import android.util.Log;
 
-import com.saulmm.tweetwear.helpers.TwitterHelperListener;
+import com.saulmm.tweetwear.helpers.TwitterLoginListener;
 
 import twitter4j.Twitter;
 import twitter4j.auth.RequestToken;
@@ -19,11 +19,11 @@ public class GetAuthorizationUrlTask extends AsyncTask <Void, Void, String> {
     private String errorMessage = "";
 
     private Twitter twitterClient = null;
-    private TwitterHelperListener twListener = null;
+    private TwitterLoginListener twListener = null;
     private RequestToken rToken;
 
 
-    public GetAuthorizationUrlTask(Twitter twitterClient, TwitterHelperListener twListener) {
+    public GetAuthorizationUrlTask(Twitter twitterClient, TwitterLoginListener twListener) {
 
         this.twitterClient = twitterClient;
         this.twListener = twListener;

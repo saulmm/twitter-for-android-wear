@@ -49,31 +49,25 @@ public class TweetFragment extends Fragment {
             cardTweet.getTweet());
 
         Matcher matcher2 = MENTION_PATTERN.matcher(cardTweet.getTweet());
-
         while (matcher2.find()) {
             spannableContent.setSpan(
-                    new ForegroundColorSpan(getResources().getColor(R.color.wall_color)),
-                    matcher2.start(), matcher2.end(),
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                new ForegroundColorSpan(getResources().getColor(R.color.wall_color)),
+                matcher2.start(), matcher2.end(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
 
         Matcher matcher3 = HASHTAG_PATTERN.matcher(cardTweet.getTweet());
-
         while (matcher3.find()) {
             spannableContent.setSpan(
-                    new ForegroundColorSpan(getResources().getColor(R.color.wall_color)),
-                    matcher3.start(), matcher3.end(),
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+                new ForegroundColorSpan(getResources().getColor(R.color.wall_color)),
+                matcher3.start(), matcher3.end(),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
-
 
         name.setText(cardTweet.getName());
         tweet.setText(spannableContent);
         time.setText(cardTweet.getTime());
 
-
         return rootView;
     }
-
-
 }

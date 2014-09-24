@@ -3,7 +3,7 @@ package com.saulmm.tweetwear.helpers;
 import twitter4j.auth.RequestToken;
 
 
-public interface TwitterHelperListener {
+public interface TwitterLoginListener {
 
     public void onAuthorizationURLReceived (String url);
     public void onAuthorizationURLFailed (String cause);

@@ -1,11 +1,5 @@
 package com.saulmm.tweetwear;
 
-import android.app.ActivityManager;
-import android.content.Context;
-import android.content.Intent;
-
-import com.saulmm.tweetwear.services.WearService;
-
 import java.util.Calendar;
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -30,8 +24,6 @@ public class Utils {
         }
         return urlIstring;
     }
-
-
 
     //1 minute = 60 seconds
     //1 hour = 60 x 60 = 3600

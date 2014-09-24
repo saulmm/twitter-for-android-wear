@@ -12,12 +12,12 @@ import com.saulmm.tweetwear.Constants;
 
 import java.util.ArrayList;
 
-public class SendDataCoolTask  extends AsyncTask<Void, Void, Void> {
+public class SendTimeLineTask extends AsyncTask<Void, Void, Void> {
 
     private ArrayList<String> contents;
     private GoogleApiClient googleApiClient;
 
-    public SendDataCoolTask(ArrayList<String> contents, GoogleApiClient googleApiClient) {
+    public SendTimeLineTask(ArrayList<String> contents, GoogleApiClient googleApiClient) {
 
         this.contents = contents;
         this.googleApiClient = googleApiClient;

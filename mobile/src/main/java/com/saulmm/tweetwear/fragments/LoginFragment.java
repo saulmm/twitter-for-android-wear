@@ -22,14 +22,14 @@ import android.widget.TextView;
 
 import com.saulmm.tweetwear.R;
 import com.saulmm.tweetwear.helpers.TwitterHelper;
-import com.saulmm.tweetwear.helpers.TwitterHelperListener;
+import com.saulmm.tweetwear.helpers.TwitterLoginListener;
 
 import twitter4j.auth.RequestToken;
 
 import static android.content.DialogInterface.OnDismissListener;
 import static android.view.View.OnClickListener;
 
-public class LoginFragment extends Fragment implements TwitterHelperListener {
+public class LoginFragment extends Fragment implements TwitterLoginListener {
 
     // UI Stuff
     private Dialog authDialog;
@@ -57,8 +57,7 @@ public class LoginFragment extends Fragment implements TwitterHelperListener {
         View rootView = initUI(inflater);
 
         twHelper = new TwitterHelper();
-        twHelper.setContext(getActivity());
-        twHelper.setListener(this);
+        twHelper.setLoginListener(this);
         twHelper.initTwitter();
 
         return rootView;
@@ -89,8 +88,8 @@ public class LoginFragment extends Fragment implements TwitterHelperListener {
             errorMessageTv.setText("");
             pDialog.show();
 
-            twHelper.setListener(LoginFragment.this);
-            twHelper.startAuthorizationUrlTask();
+            twHelper.setLoginListener(LoginFragment.this);
+            twHelper.requestAuthorizationUrl();
         }
     };
 
@@ -120,7 +119,7 @@ public class LoginFragment extends Fragment implements TwitterHelperListener {
                 String oauthVerifier = uri.getQueryParameter("oauth_verifier");
 
                 twHelper.setOauthVerifier(oauthVerifier);
-                twHelper.startAccessTokenTask();
+                twHelper.requestAccessToken();
 
 
             } else if (url.contains("denied")) {

@@ -6,7 +6,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import com.saulmm.tweetwear.Constants;
-import com.saulmm.tweetwear.helpers.TwitterHelperListener;
+import com.saulmm.tweetwear.helpers.TwitterLoginListener;
 
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -17,9 +17,9 @@ import twitter4j.auth.RequestToken;
 import static android.content.SharedPreferences.Editor;
 
 
-public class SaveAccessTokenTask extends AsyncTask <Void, Void, String> {
+public class GetAccessTokenTask extends AsyncTask <Void, Void, String> {
 
-    private final TwitterHelperListener twListener;
+    private final TwitterLoginListener twListener;
     private final SharedPreferences preferences;
     private final RequestToken rToken;
     private final Twitter twClient;
@@ -27,8 +27,8 @@ public class SaveAccessTokenTask extends AsyncTask <Void, Void, String> {
     private String errorMessage;
 
 
-    public SaveAccessTokenTask (Context context, Twitter twClient,
-            TwitterHelperListener twListener, RequestToken rToken, String verifier) {
+    public GetAccessTokenTask(Context context, Twitter twClient,
+                              TwitterLoginListener twListener, RequestToken rToken, String verifier) {
 
         this.twListener = twListener;
         this.twClient = twClient;
