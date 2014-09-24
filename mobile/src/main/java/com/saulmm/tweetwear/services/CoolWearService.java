@@ -6,7 +6,6 @@ import android.os.Bundle;
 import android.util.Log;
 
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.wearable.DataEventBuffer;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
@@ -15,7 +14,6 @@ import com.google.android.gms.wearable.WearableListenerService;
 import com.saulmm.tweetwear.Constants;
 import com.saulmm.tweetwear.helpers.TwitterHelper;
 import com.saulmm.tweetwear.listeners.TimeLineListener;
-import com.saulmm.tweetwear.tasks.GetTwitterTimeline;
 import com.saulmm.tweetwear.tasks.SendDataCoolTask;
 import com.saulmm.tweetwear.tasks.SendMessageTask;
 
@@ -26,7 +24,6 @@ import java.util.HashSet;
 public class CoolWearService extends WearableListenerService  {
 
     private TwitterHelper twHelper;
-    private Node connectedNode;
     private GoogleApiClient googleApiClient;
 
     @Override
@@ -37,43 +34,20 @@ public class CoolWearService extends WearableListenerService  {
         SharedPreferences preferences = getSharedPreferences(
             Constants.PREFS, Context.MODE_PRIVATE);
 
-        // Init a twitter helper instance
-        String aToken = preferences.getString ("ACCESS_TOKEN", "");
-        String aTokenSecret = preferences.getString ("ACCESS_TOKEN_SECRET", "");
-        twHelper = new TwitterHelper(aToken, aTokenSecret);
+        // Get an instance of an authorized tw helper
+        twHelper = new TwitterHelper (
+            preferences.getString ("ACCESS_TOKEN", ""),
+            preferences.getString ("ACCESS_TOKEN_SECRET", ""));
 
-        initGoogleApiClient();
-    }
-
-
-    private void initGoogleApiClient() {
-
+        // Init and connect the client to use the wear api
         googleApiClient = new GoogleApiClient.Builder(this)
-            .addConnectionCallbacks (gConnectionCallbacks)
-            .addApi(Wearable.API)
-            .build();
+                .addConnectionCallbacks (gConnectionCallbacks)
+                .addApi(Wearable.API)
+                .build();
 
         googleApiClient.connect();
     }
 
-
-    @Override
-    public void onDataChanged(DataEventBuffer dataEvents) {
-
-        super.onDataChanged(dataEvents);
-
-        Log.d("[DEBUG] CoolWearService - onDataChanged", "HII");
-    }
-
-    @Override
-    public void onPeerConnected(Node connectedNode) {
-
-        super.onPeerConnected(connectedNode);
-        this.connectedNode = connectedNode;
-
-        Log.d ("[DEBUG] CoolWearService - onPeerConnected", "Peer ID: "+connectedNode.getId());
-
-    }
 
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
@@ -81,28 +55,25 @@ public class CoolWearService extends WearableListenerService  {
         super.onMessageReceived(messageEvent);
 
         String msg = messageEvent.getPath();
-        Log.d("[DEBUG] CoolWearService - onMessageReceived", "MS received: " + msg);
 
         // Message: /tweets/hi/
         if (msg.equals(Constants.MSG_SALUDATE)) {
 
-            try {
-                Node connectedNode = getNodes(googleApiClient);
+            Node connectedNode = getConnectedNode(googleApiClient);
 
-                new SendMessageTask(Constants.MSG_AVAILABLE, googleApiClient,connectedNode)
+            if (connectedNode != null)
+                new SendMessageTask(Constants.MSG_AVAILABLE, googleApiClient, connectedNode)
                     .execute();
 
-            } catch (NullPointerException e) {
-                Log.e("[ERROR] WearService - onMessageReceived",
-                    "" + msg + " - " + e.getMessage());
-            }
+            else
+               Log.e ("[ERROR] CoolWearService - onMessageReceived", "No nodes detected ");
         }
 
         // Message: /tweets/timeline
         if (msg.equals(Constants.MSG_LOAD_LAST_TIMELINE)) {
 
-            new GetTwitterTimeline(twHelper.getTwClient(), timeLineListener)
-                .execute();
+            twHelper.requestTwitterTimeLine(timeLineListener);
+
 
         // /tweets/retweet/
         } else if (msg.startsWith(Constants.MSG_RETWEET)) {
@@ -116,7 +87,7 @@ public class CoolWearService extends WearableListenerService  {
     }
 
 
-    private Node getNodes(GoogleApiClient googleApiClient) {
+    private Node getConnectedNode(GoogleApiClient googleApiClient) {
 
         HashSet<String> results= new HashSet<String>();
         NodeApi.GetConnectedNodesResult nodes =
