@@ -2,10 +2,8 @@ package com.saulmm.tweetwear.fragments;
 
 import android.annotation.SuppressLint;
 import android.app.Fragment;
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.wearable.activity.ConfirmationActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,12 +12,14 @@ import android.view.animation.AnimationSet;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.saulmm.tweetwear.DeviceHandler;
 import com.saulmm.tweetwear.R;
 import com.saulmm.tweetwear.data.Tweet;
 import com.saulmm.tweetwear.enums.TwitterAction;
 import com.saulmm.tweetwear.listeners.ActionListener;
+import com.saulmm.tweetwear.listeners.PagerListener;
 
 @SuppressLint("ValidFragment")
 public class TwitterActionFragment extends Fragment implements View.OnClickListener {
@@ -31,6 +31,7 @@ public class TwitterActionFragment extends Fragment implements View.OnClickListe
     private ImageButton actionImg;
     private AnimationSet setAnimMeaningOn;
     private DeviceHandler handler;
+    private PagerListener pagerListener;
 
 
     public void setTwAction(TwitterAction twAction) {
@@ -72,11 +73,11 @@ public class TwitterActionFragment extends Fragment implements View.OnClickListe
                 actionText.setText ("Retweet");
 
                 int drawableRT = (!currentTweet.isRetweeted())
-                        ? R.drawable.tw_rt
-                        : R.drawable.tw_rt_ed;
+                    ? R.drawable.tw_rt
+                    : R.drawable.tw_rt_ed;
 
                 actionImg.setImageDrawable(getResources()
-                        .getDrawable(drawableRT));
+                    .getDrawable(drawableRT));
                 break;
 
             case FAVORITE:
@@ -88,7 +89,7 @@ public class TwitterActionFragment extends Fragment implements View.OnClickListe
 
 
                 actionImg.setImageDrawable(getResources()
-                        .getDrawable(drawableFav));
+                    .getDrawable(drawableFav));
 
                 break;
         }
@@ -112,24 +113,39 @@ public class TwitterActionFragment extends Fragment implements View.OnClickListe
     ActionListener actionListener = new ActionListener() {
         @Override
         public void onActionOK () {
-            Log.d ("[DEBUG] TwitterActionFragment - onActionOK", "OnAction OK");
-            
-            Intent confirmationActivity = new Intent(getActivity(), ConfirmationActivity.class)
-                .putExtra(ConfirmationActivity.EXTRA_ANIMATION_TYPE, ConfirmationActivity.SUCCESS_ANIMATION)
-                .putExtra(ConfirmationActivity.EXTRA_MESSAGE, actionText.getText()+"ed");
 
-            startActivity(confirmationActivity);
+            final String action = (twAction == TwitterAction.RETWEET) ? "Retweet" : "Favorite";
+
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getActivity(), action + " successful !", Toast.LENGTH_SHORT).show();
+                    actionImg.clearAnimation();
+                }
+            });
+
         }
 
         @Override
         public void onActionFail () {
-            Log.d ("[DEBUG] TwitterActionFragment - onActionFail", "On action fail");
 
-            Intent intent = new Intent(getActivity(), ConfirmationActivity.class);
-            intent.putExtra(ConfirmationActivity.EXTRA_ANIMATION_TYPE, ConfirmationActivity.FAILURE_ANIMATION);
-            intent.putExtra(ConfirmationActivity.EXTRA_MESSAGE, "Error!");
-            startActivity(intent);
+            final String action = (twAction == TwitterAction.RETWEET) ? "Retweet" : "Favorite";
+
+            getActivity().runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Toast.makeText(getActivity(), action + " failed :(", Toast.LENGTH_SHORT).show();
+                    actionImg.clearAnimation();
+                }
+            });
         }
     };
 
+    public void setPagerListener(PagerListener pagerListener) {
+        this.pagerListener = pagerListener;
+    }
+
+    public PagerListener getPagerListener() {
+        return pagerListener;
+    }
 }

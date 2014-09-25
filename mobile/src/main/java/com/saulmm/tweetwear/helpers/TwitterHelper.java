@@ -55,10 +55,6 @@ public class TwitterHelper {
     }
 
 
-    /**
-     * Start a twitter client instance
-     */
-    // TODO: review this
     public void initTwitter() {
 
         twClient = new TwitterFactory().getInstance();
@@ -74,10 +70,12 @@ public class TwitterHelper {
         new GetAuthorizationUrlTask(twClient, loginListener).execute();
     }
 
+
     public void requestTwitterTimeLine (TwitterOperationListener twitterListener) {
 
         new TwitterTimeLineTask(twitterListener).execute();
     }
+
 
     public void requestAccessToken() {
 
@@ -85,10 +83,12 @@ public class TwitterHelper {
             .execute();
     }
 
+
     public void retweet (String tweetID) {
 
         new TwitterOperationTask(tweetID).execute(true);
     }
+
 
     public void markTweetAsFavorite (String tweetID) {
 
@@ -101,6 +101,7 @@ public class TwitterHelper {
         this.oauthVerifier = oauthVerifier;
     }
 
+
     public void setRequestToken(RequestToken requestToken) {
 
         this.requestToken = requestToken;
@@ -111,9 +112,11 @@ public class TwitterHelper {
         this.loginListener = loginListener;
     }
 
+
     public void setTwitterListener(TwitterOperationListener twitterListener) {
         this.twitterListener = twitterListener;
     }
+
 
     private class TwitterTimeLineTask extends AsyncTask<Void, Void, ArrayList<Status>> {
 
@@ -186,6 +189,7 @@ public class TwitterHelper {
         }
     }
 
+
     private class TwitterOperationTask extends AsyncTask <Boolean, Void, Boolean> {
         private final String tweetID;
         private boolean isARetweet;
@@ -220,7 +224,7 @@ public class TwitterHelper {
         protected void onPostExecute(Boolean operationSuccessfully) {
 
             super.onPostExecute(operationSuccessfully);
-            twitterListener.onTwitterOperationSuccess(isARetweet);
+            twitterListener.onTwitterOperationSuccess(operationSuccessfully);
         }
     }
 

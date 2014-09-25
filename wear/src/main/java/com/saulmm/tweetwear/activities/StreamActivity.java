@@ -14,6 +14,7 @@ import com.saulmm.tweetwear.data.Tweet;
 import com.saulmm.tweetwear.enums.TwitterAction;
 import com.saulmm.tweetwear.fragments.TweetFragment;
 import com.saulmm.tweetwear.fragments.TwitterActionFragment;
+import com.saulmm.tweetwear.listeners.PagerListener;
 
 import java.util.ArrayList;
 
@@ -59,6 +60,13 @@ public class StreamActivity extends Activity {
         }
     }
 
+    public PagerListener pListener = new PagerListener() {
+        @Override
+        public void onChangePage() {
+            streamPager.setCurrentItem(pagerRow, 0);
+        }
+    };
+
     private void initUI() {
 
         setContentView(R.layout.rect_activity_my);
@@ -77,6 +85,7 @@ public class StreamActivity extends Activity {
         this.finish();
     }
 
+    private int pagerRow;
     class TwitterAdapter extends FragmentGridPagerAdapter {
         private Context context;
         private ArrayList<Tweet> tweets;
@@ -92,9 +101,12 @@ public class StreamActivity extends Activity {
         public Fragment getFragment(int row, int column) {
             Tweet currentTweet = tweets.get(row);
             TwitterActionFragment twitterActionFragment = new TwitterActionFragment();
+            twitterActionFragment.setPagerListener(pListener);
+            pagerRow = row;
 
             if (column == 0) {
                 TweetFragment tf = new TweetFragment();
+
                 tf.setCardTweet(currentTweet);
                 return tf;
 

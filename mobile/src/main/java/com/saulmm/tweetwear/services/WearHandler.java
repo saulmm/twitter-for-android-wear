@@ -2,13 +2,11 @@ package com.saulmm.tweetwear.services;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 import com.saulmm.tweetwear.Constants;
@@ -60,7 +58,7 @@ public class WearHandler extends WearableListenerService  {
         // Message: /tweets/hi/
         if (msg.equals(Constants.MSG_SALUDATE)) {
 
-            new RequestConnectedNodes().execute();
+            sendMessageToWearable(Constants.MSG_AVAILABLE);
         }
 
         // Message: /tweets/timeline
@@ -83,40 +81,13 @@ public class WearHandler extends WearableListenerService  {
     }
 
 
-
-    private class  RequestConnectedNodes extends AsyncTask<Void, Void, Node> {
-
-        @Override
-        protected Node doInBackground(Void... params) {
-
-            NodeApi.GetConnectedNodesResult nodes =
-                    Wearable.NodeApi.getConnectedNodes(googleApiClient).await();
-
-            if (nodes.getNodes().isEmpty())
-                return null;
-
-            else
-                return nodes.getNodes().get(0);
-        }
-
-        @Override
-        protected void onPostExecute(Node node) {
-
-            super.onPostExecute(node);
-            connectedNode = node;
-
-            sendMessageToWearable(Constants.MSG_AVAILABLE);
-        }
-    }
-
-
     private TwitterOperationListener twitterListener = new TwitterOperationListener() {
 
         @Override
         public void onTimeLineReceived(ArrayList<String> tweets) {
 
             new SendTimeLineTask(tweets, googleApiClient)
-                    .execute();
+                .execute();
         }
 
         @Override
@@ -138,8 +109,6 @@ public class WearHandler extends WearableListenerService  {
 
 
     public void sendMessageToWearable (String message) {
-
-        Log.d ("[DEBUG] WearHandler - sendMessageToWearable", "Is connectednode null: "+(connectedNode == null));
 
         new SendMessageTask(message, googleApiClient, connectedNode)
             .execute();
