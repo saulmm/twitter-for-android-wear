@@ -13,14 +13,12 @@ import static com.google.android.gms.wearable.MessageApi.SendMessageResult;
 public class SendMessageTask extends AsyncTask<Void, Void, Void> {
 
     private String message;
-    private Node connectedNode;
     private GoogleApiClient googleApiClient;
 
-    public SendMessageTask(String message, GoogleApiClient googleApiClient, Node connectedNode) {
+    public SendMessageTask(String message, GoogleApiClient googleApiClient) {
 
         this.message = message;
         this.googleApiClient = googleApiClient;
-        this.connectedNode = connectedNode;
     }
 
     @Override
