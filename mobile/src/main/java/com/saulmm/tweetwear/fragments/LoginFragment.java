@@ -56,7 +56,7 @@ public class LoginFragment extends Fragment implements TwitterLoginListener {
 
         View rootView = initUI(inflater);
 
-        twHelper = new TwitterHelper();
+        twHelper = new TwitterHelper(getActivity());
         twHelper.setLoginListener(this);
         twHelper.initTwitter();
 
@@ -85,11 +85,11 @@ public class LoginFragment extends Fragment implements TwitterLoginListener {
         @Override
         public void onClick(View v) {
 
-            errorMessageTv.setText("");
-            pDialog.show();
+        errorMessageTv.setText("");
+        pDialog.show();
 
-            twHelper.setLoginListener(LoginFragment.this);
-            twHelper.requestAuthorizationUrl();
+        twHelper.setLoginListener(LoginFragment.this);
+        twHelper.requestAuthorizationUrl();
         }
     };
 

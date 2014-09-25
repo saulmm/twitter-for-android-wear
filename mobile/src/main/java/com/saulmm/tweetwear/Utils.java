@@ -25,9 +25,7 @@ public class Utils {
         return urlIstring;
     }
 
-    //1 minute = 60 seconds
-    //1 hour = 60 x 60 = 3600
-    //1 day = 3600 x 24 = 86400
+
     public static String getTimeDiference(Date endDate){
         // TODO harcoded text
         String days = " days";

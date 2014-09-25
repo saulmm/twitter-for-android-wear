@@ -19,6 +19,7 @@ public class Constants {
     public final static String MSG_NO_ITERNET          = "/tweets/state/no_internet";
     public final static String MSG_AVAILABLE           = "/tweets/state/available";
     public final static String MSG_SALUDATE            = "/tweets/hi/";
+    public final static String MSG_NOT_LOGGED          = "/tweets/state/no_login";
 
     public static final String CONSUMER_KEY            = "b150R2Rdg2YcxjCzcEtMJFbNL";
     public static final String CONSUMER_SECRET         = "WDlGeEDipGzW4WYo9eZbkrWguITQEcSjU56k4QELNQAnU6lUSB";

@@ -1,4 +1,4 @@
-package com.saulmm.tweetwear.tasks;
+package com.saulmm.tweetwear.wear_tasks;
 
 import android.os.AsyncTask;
 import android.util.Log;

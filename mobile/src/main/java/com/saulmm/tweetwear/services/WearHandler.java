@@ -3,6 +3,7 @@ package com.saulmm.tweetwear.services;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.MessageEvent;
@@ -12,8 +13,8 @@ import com.google.android.gms.wearable.WearableListenerService;
 import com.saulmm.tweetwear.Constants;
 import com.saulmm.tweetwear.helpers.TwitterHelper;
 import com.saulmm.tweetwear.helpers.TwitterOperationListener;
-import com.saulmm.tweetwear.tasks.SendMessageTask;
-import com.saulmm.tweetwear.tasks.SendTimeLineTask;
+import com.saulmm.tweetwear.wear_tasks.SendMessageTask;
+import com.saulmm.tweetwear.wear_tasks.SendTimeLineTask;
 
 import java.util.ArrayList;
 
@@ -32,11 +33,8 @@ public class WearHandler extends WearableListenerService  {
         SharedPreferences preferences = getSharedPreferences(
             Constants.PREFS, Context.MODE_PRIVATE);
 
-        // Get an instance of an authorized tw helper
-        twHelper = new TwitterHelper (
-            preferences.getString ("ACCESS_TOKEN", ""),
-            preferences.getString ("ACCESS_TOKEN_SECRET", ""));
 
+        twHelper = new TwitterHelper(this);
         twHelper.setTwitterListener(twitterListener);
 
         // Init and connect the client to use the wear api
@@ -54,6 +52,15 @@ public class WearHandler extends WearableListenerService  {
         super.onMessageReceived(messageEvent);
 
         String msg = messageEvent.getPath();
+
+        if (!twHelper.isUserLogged()) {
+
+            Toast.makeText(this, "Please open wear app and log in with twitter", Toast.LENGTH_SHORT)
+                .show();
+
+            sendMessageToWearable(Constants.MSG_NOT_LOGGED);
+            return;
+        }
 
         // Message: /tweets/hi/
         if (msg.equals(Constants.MSG_SALUDATE)) {
