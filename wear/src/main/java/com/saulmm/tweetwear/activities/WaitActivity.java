@@ -17,8 +17,6 @@ import com.saulmm.tweetwear.listeners.WearTwitterServiceListener;
 
 import java.util.ArrayList;
 
-import static android.util.Log.d;
-
 
 public class WaitActivity extends Activity implements WearTwitterServiceListener {
     private DeviceHandler handler;
@@ -44,18 +42,13 @@ public class WaitActivity extends Activity implements WearTwitterServiceListener
     private void initUI() {
         setContentView(R.layout.activity_wait);
 
-        stateMessageTV = (TextView) findViewById (R.id.loading_textview);
-        loadingFL = (FrameLayout) findViewById (R.id.loading_frame);
-        loadingSegment = (ImageView) findViewById(R.id.loading_segment);
+        stateMessageTV  = (TextView) findViewById (R.id.loading_textview);
+        loadingFL       = (FrameLayout) findViewById (R.id.loading_frame);
+        loadingSegment  = (ImageView) findViewById(R.id.loading_segment);
+
         loadingSegment.startAnimation(AnimationUtils.loadAnimation(this, R.anim.loading_animation));
-        printWelcomeMessage();
     }
 
-    private void printWelcomeMessage() {
-        Log.d ("[DEBUG] WaitActivity - printWelcomeMessage",
-                "\n\n\n\n[INFO][DEBUG][ERROR] \n [INFO][DEBUG][ERROR] \n [INFO][DEBUG][ERROR] \n [INFO][DEBUG][ERROR] \n [INFO][DEBUG][ERROR] New run \n [INFO][DEBUG][ERROR] \n [INFO][DEBUG][ERROR] \n [INFO][DEBUG][ERROR] \n\n\n\n");
-        
-    }
 
     @Override
     protected void onStart() {
@@ -67,32 +60,34 @@ public class WaitActivity extends Activity implements WearTwitterServiceListener
     @Override
     public void onWearReady(boolean connected) {
 
-        Log.d("[DEBUG] WaitActivity - onWearReady", "Wear device ready: "+connected);
-
         if (connected)
             handler.requestTwitterTimeline();
 
         else {
             showError("Android device not found");
         }
-
-
     }
 
-    private void showError(String errorMessage) {
+    private void showError(final String errorMessage) {
 
-        loadingSegment.clearAnimation();
-        loadingSegment.setVisibility(View.INVISIBLE);
-        stateMessageTV.setText (errorMessage);
-        stateMessageTV.setTextSize (stateMessageTV.getTextSize() - 20);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
 
-        TransitionDrawable transition = (TransitionDrawable) loadingFL.getBackground();
-        transition.startTransition(1000);
+                loadingSegment.clearAnimation();
+                loadingSegment.setVisibility(View.INVISIBLE);
+                stateMessageTV.setText (errorMessage);
+                stateMessageTV.setTextSize (stateMessageTV.getTextSize() - 20);
+
+                TransitionDrawable transition = (TransitionDrawable) loadingFL.getBackground();
+                transition.startTransition(1000);
+            }
+        });
     }
 
     @Override
     public void onTimeLimeReceived (ArrayList <String> timeline) {
-        d("[DEBUG] WaitActivity - onTimeLimeReceived", "Time line received, tweets: " + timeline.size());
+
         Intent streamIntent = new Intent (WaitActivity.this, StreamActivity.class);
         Bundle b  = new Bundle();
         b.putStringArrayList ("tweets", timeline);
@@ -108,6 +103,10 @@ public class WaitActivity extends Activity implements WearTwitterServiceListener
         if (problem.equals ("/tweets/state/no_internet")) {
             Log.d("[DEBUG] WaitActivity - onProblem", "NO internet");
             showError("Please check your\n internet connection");
+        }
+
+        if (problem.equals ("/tweets/state/no_login")) {
+            showError("Please login\n with your\ndevice");
         }
 
         if(problem.equals("Service not running"))

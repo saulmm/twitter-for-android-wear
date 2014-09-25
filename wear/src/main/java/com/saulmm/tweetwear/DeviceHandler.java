@@ -49,6 +49,7 @@ public class DeviceHandler implements ConnectionCallbacks, OnConnectionFailedLis
 
 
 
+
     /**
      * Singleton pattern
      * @return an instance of DeviceService
@@ -176,6 +177,10 @@ public class DeviceHandler implements ConnectionCallbacks, OnConnectionFailedLis
         }
 
         if (messagePath.equals("/tweets/state/no_internet")) {
+            deviceListener.onProblem(messagePath);
+        }
+
+        if (messagePath.equals("/tweets/state/no_login")) {
             deviceListener.onProblem(messagePath);
         }
 

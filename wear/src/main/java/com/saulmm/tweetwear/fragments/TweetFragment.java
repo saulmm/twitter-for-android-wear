@@ -48,32 +48,26 @@ public class TweetFragment extends Fragment {
         SpannableString spannableContent = new SpannableString (
             cardTweet.getTweet());
 
-        Matcher matcher2 = MENTION_PATTERN.matcher(cardTweet.getTweet());
+        Matcher mentionMatcher  = MENTION_PATTERN.matcher(cardTweet.getTweet());
+        setPatternSpan (mentionMatcher, spannableContent);
 
-        while (matcher2.find()) {
-            spannableContent.setSpan(
-                    new ForegroundColorSpan(getResources().getColor(R.color.wall_color)),
-                    matcher2.start(), matcher2.end(),
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-
-        Matcher matcher3 = HASHTAG_PATTERN.matcher(cardTweet.getTweet());
-
-        while (matcher3.find()) {
-            spannableContent.setSpan(
-                    new ForegroundColorSpan(getResources().getColor(R.color.wall_color)),
-                    matcher3.start(), matcher3.end(),
-                    Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
-        }
-
+        Matcher hashtagMatcher = HASHTAG_PATTERN.matcher(cardTweet.getTweet());
+        setPatternSpan(hashtagMatcher, spannableContent);
 
         name.setText(cardTweet.getName());
         tweet.setText(spannableContent);
         time.setText(cardTweet.getTime());
 
-
         return rootView;
     }
 
 
+    public void setPatternSpan(Matcher matcher, SpannableString spString) {
+
+        while (matcher.find()) {
+
+            spString.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.wall_color)),
+                matcher.start(), matcher.end(),Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
+        }
+    }
 }

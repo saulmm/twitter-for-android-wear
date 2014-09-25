@@ -4,16 +4,12 @@ import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.app.ProgressDialog;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.Intent;
-import android.content.ServiceConnection;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -25,39 +21,44 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import com.saulmm.tweetwear.R;
-import com.saulmm.tweetwear.Utils;
-import com.saulmm.tweetwear.helpers.TwitterHelperListener;
-import com.saulmm.tweetwear.services.WearService;
+import com.saulmm.tweetwear.helpers.TwitterHelper;
+import com.saulmm.tweetwear.helpers.TwitterLoginListener;
 
 import twitter4j.auth.RequestToken;
 
 import static android.content.DialogInterface.OnDismissListener;
-import static android.util.Log.d;
-import static android.util.Log.i;
 import static android.view.View.OnClickListener;
 
-public class LoginFragment extends Fragment implements TwitterHelperListener {
+public class LoginFragment extends Fragment implements TwitterLoginListener {
 
     // UI Stuff
     private Dialog authDialog;
-    private WebView webview;
     private TextView errorMessageTv;
     private Button twitterLoginFragmentButton;
     private ProgressDialog pDialog;
 
+    private Context ctx;
+
     // Other stuff
     private boolean authOk;
 
-    // Service
-    private WearService wearService;
-    private boolean isBound;
+    private TwitterHelper twHelper;
 
+    public void setCtx(Context ctx) {
+        this.ctx = ctx;
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) { }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        Utils.startServiceIfNeccessary (getActivity());
         View rootView = initUI(inflater);
+
+        twHelper = new TwitterHelper(getActivity());
+        twHelper.setLoginListener(this);
+        twHelper.initTwitter();
 
         return rootView;
     }
@@ -70,11 +71,12 @@ public class LoginFragment extends Fragment implements TwitterHelperListener {
         pDialog.setCancelable(false);
 
         View rootView = inflater.inflate(R.layout.fragment_login, null); // TODO Check this
-        twitterLoginFragmentButton = (Button) rootView.findViewById(R.id.tw_login_fragment_button);
-        twitterLoginFragmentButton.setOnClickListener(onClickTwitterListener);
-        errorMessageTv = (TextView) rootView.findViewById(R.id.tw_login_error_msg);
 
-        doBindService();
+        twitterLoginFragmentButton  = (Button) rootView.findViewById(R.id.tw_login_fragment_button);
+        errorMessageTv              = (TextView) rootView.findViewById(R.id.tw_login_error_msg);
+
+        twitterLoginFragmentButton.setOnClickListener(onClickTwitterListener);
+
         return rootView;
     }
 
@@ -83,11 +85,11 @@ public class LoginFragment extends Fragment implements TwitterHelperListener {
         @Override
         public void onClick(View v) {
 
-            errorMessageTv.setText("");
-            pDialog.show();
+        errorMessageTv.setText("");
+        pDialog.show();
 
-            wearService.setListener(LoginFragment.this);
-            wearService.startAuthorizationUrlTask();
+        twHelper.setLoginListener(LoginFragment.this);
+        twHelper.requestAuthorizationUrl();
         }
     };
 
@@ -115,8 +117,9 @@ public class LoginFragment extends Fragment implements TwitterHelperListener {
 
                 Uri uri = Uri.parse(url);
                 String oauthVerifier = uri.getQueryParameter("oauth_verifier");
-                wearService.setOauthVerifier(oauthVerifier);
-                wearService.startAccessTokenTask();
+
+                twHelper.setOauthVerifier(oauthVerifier);
+                twHelper.requestAccessToken();
 
 
             } else if (url.contains("denied")) {
@@ -134,7 +137,7 @@ public class LoginFragment extends Fragment implements TwitterHelperListener {
             if (!authOk) {
 
                 // Reinitialize the twitter client
-                wearService.initTwitter();
+                twHelper.initTwitter();
                 pDialog.dismiss();
                 String errorMsg = "You must be logged in to use twitter in android wear"; // TODO Hardcoded string
                 showButtonError(errorMsg);
@@ -152,14 +155,12 @@ public class LoginFragment extends Fragment implements TwitterHelperListener {
             authDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
             authDialog.setContentView(R.layout.dialog_twitter_authorization);
 
-
-            webview = (WebView) authDialog.findViewById(R.id.webv);
+            WebView webview = (WebView) authDialog.findViewById(R.id.webv);
 
             webview.getSettings().setJavaScriptEnabled(true);
-            webview.loadUrl("file:///android_asset/index.html");
+            webview.loadUrl("file://android_asset/index.html");
             webview.loadUrl(url);
             webview.setWebViewClient(oauthWebClient);
-
 
             authDialog.show();
             authDialog.setCancelable(true);
@@ -202,61 +203,17 @@ public class LoginFragment extends Fragment implements TwitterHelperListener {
         twitterLoginFragmentButton.setEnabled(false);
         pDialog.dismiss();
 
-        wearService.cancelAllTasks ();
-
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.content_frame, new UserFragment());
         ft.setTransition(FragmentTransaction.TRANSIT_ENTER_MASK);
         ft.remove(LoginFragment.this);
         ft.commit();
-
     }
 
     @Override
     public void onRequestTokenReceived(RequestToken rToken) {
 
         // I know that this is not the best way to save the request token
-        wearService.setRequestToken (rToken);
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        doUnbindService();
-    }
-
-    // Binder to maintain a conversation with the wear & twitter service
-    private final ServiceConnection mConnection = new ServiceConnection() {
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-
-            wearService = ((WearService.LocalBinder) service).getService();
-            i("[INFO] LoginActivity - onServiceConnected", "Service connected...");
-        }
-
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-
-            wearService = null;
-            d ("[ERROR] LoginActivity - onServiceDisconnected", "Service disconnected...");
-        }
-    };
-
-
-    private void doBindService () {
-        getActivity().bindService(new Intent(getActivity(), WearService.class),
-                mConnection, Context.BIND_AUTO_CREATE);
-
-        isBound = true;
-    }
-
-    private void doUnbindService () {
-        if (isBound) {
-            getActivity().unbindService(mConnection);
-
-            isBound = false;
-        }
+        twHelper.setRequestToken (rToken);
     }
 }

@@ -15,7 +15,7 @@
         android:layout_centerHorizontal="true"
         android:layout_centerVertical="true"
         android:src="@drawable/twitter"
-        android:background="@drawable/rtback"
+        android:background="@drawable/tr_success"
         />
 
     <TextView
