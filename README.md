@@ -1,6 +1,10 @@
 # Twitter client for android wear
 
-<div style="text-align:center"><img src ="https://googledrive.com/host/0B62SZ3WRM2R2RURpRkhYdG5PZjg" /></div>
+<div style="text-align:center"><img src ="https://s3.amazonaws.com/pushbullet-uploads/ujDhpJwIHv2-blQnn5U92wbgrQLbg4jhwRMO5PzaMJYx/header.png" /></div>
+
+#### Google Play link: 
+
+- [http://goo.gl/hHUaz5](http://goo.gl/hHUaz5)
 
 ## 1. Motivation
 
@@ -30,21 +34,16 @@ Like a normal android app, has an _activity_, a few _fragments_ and some _layout
 
 The interesting part from my point of view is the communication with the wearable. 
 
-The clock always could ask the list of tweets, so the class that asks twitter for the tweets must be always available and able to take care of it, so I think that a [service](http://developer.android.com/guide/components/services.html) is the best choice.
+The clock always could ask the list of tweets, so the class that asks twitter for the tweets must be always available and able to take care of it, so I think that a [WearListenerService](http://developer.android.com/reference/com/google/android/gms/wearable/WearableListenerService.html) is the best choice.
 
 ```xml
-<service android:name=".services.WearService"/>
-```
-
-That service must be started when the device boots, otherwise the user would have to open the application after start manually, I do not think it is the best usability choice. That can be solved easily with a [broadcast receiver](http://developer.android.com/reference/android/content/BroadcastReceiver.html).
-
-```xml
-<receiver android:name=".receivers.BootReceiver" android:enabled="true" android:exported="false">
+<service android:name=".services.WearHandler">
   <intent-filter>
-    <action android:name="android.intent.action.BOOT_COMPLETED"/>
+      <action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
   </intent-filter>
-</receiver>
+</service>
 ```
+
 
 For all twitter connections I had relied in the library [twitter4j](http://twitter4j.org/en/index.html), a very mature and complete java library responsible for all interaction with twitter APIs, you only have to create an app in [twitter developers](https://dev.twitter.com/), __twitter4j__ will do the hard work.
 
@@ -55,48 +54,131 @@ And here is the fun part, after reviewing the documentation of [android develope
 1. Connect with **Google Play Services**
 
 ```java
-@Override
-public void onCreate() {
-   super.onCreate();
+package com.saulmm.tweetwear.services;
 
-   // Init & connect gApiClient
-   googleApiClient = new Builder(this)
-      .addConnectionCallbacks (gConnectionCallbacks)
-      .addOnConnectionFailedListener (gConnectionFailed)
-      .addApi(Wearable.API)
-      .build();
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.util.Log;
+import android.widget.Toast;
+
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.MessageEvent;
+import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.Wearable;
+import com.google.android.gms.wearable.WearableListenerService;
+import com.saulmm.tweetwear.Constants;
+import com.saulmm.tweetwear.helpers.TwitterHelper;
+import com.saulmm.tweetwear.helpers.TwitterOperationListener;
+import com.saulmm.tweetwear.wear_tasks.SendMessageTask;
+import com.saulmm.tweetwear.wear_tasks.SendTimeLineTask;
+
+import java.util.ArrayList;
+
+
+public class WearHandler extends WearableListenerService  {
+
+    private TwitterHelper twHelper;
+    private GoogleApiClient googleApiClient;
+    private Node connectedNode;
+
+    @Override
+    public void onCreate() {
+
+        super.onCreate();
+
+        SharedPreferences preferences = getSharedPreferences(
+            Constants.PREFS, Context.MODE_PRIVATE);
+        
+        twHelper = new TwitterHelper(this);
+        twHelper.setTwitterListener(twitterListener);
+
+        // Init and connect the client to use the wear api
+        googleApiClient = new GoogleApiClient.Builder(this)
+            .addApi(Wearable.API)
+            .build();
+
+        // Connect to google play services
+        googleApiClient.connect();
+    }
+
+
+    @Override
+    public void onMessageReceived(MessageEvent messageEvent) {
+
+        super.onMessageReceived(messageEvent);
+
+        // The message that was send by the wearable
+        String msg = messageEvent.getPath();
+
+        if (!twHelper.isUserLogged()) {
+
+            Toast.makeText(this, "Please open wear app and log in with twitter", Toast.LENGTH_SHORT)
+                .show();
+
+            sendMessageToWearable(Constants.MSG_NOT_LOGGED);
+            return;
+        }
+
+        // Message: /tweets/hi/
+        if (msg.equals(Constants.MSG_SALUDATE)) {
+
+            sendMessageToWearable(Constants.MSG_AVAILABLE);
+        }
+
+        // Message: /tweets/timeline
+        if (msg.equals(Constants.MSG_LOAD_LAST_TIMELINE)) {
+
+            twHelper.requestTwitterTimeLine(twitterListener);
+
+        // Message /tweets/retweet/<tweet id>
+        } else if (msg.startsWith(Constants.MSG_RETWEET)) {
+
+            String twID = msg.split("/")[3];
+            twHelper.retweet(twID);
+
+        // Message /tweets/favorite/<tweet id>
+        } else if (msg.startsWith(Constants.MSG_FAVORITE)) {
+
+            String twID = msg.split("/")[3];
+            twHelper.markTweetAsFavorite(twID);
+        }
+    }
+
+
+    private TwitterOperationListener twitterListener = new TwitterOperationListener() {
+
+        @Override
+        public void onTimeLineReceived(ArrayList<String> tweets) {
+
+            new SendTimeLineTask(tweets, googleApiClient)
+                .execute();
+        }
+
+        @Override
+        public void onTwitterOperationSuccess(boolean success) {
+
+            String messageToWear = (success)
+                ? Constants.MSG_RETWEET_OK
+                : Constants.MSG_RETWEET_FAIL;
+
+            sendMessageToWearable(messageToWear);
+        }
+
+        @Override
+        public void onTwitterFail(String errorMessage) {
+
+            Log.e ("[ERROR] WearHandler - onTwitterFail", "Error: "+errorMessage);
+        }
+    };
+
+
+    public void sendMessageToWearable (String message) {
+
+        new SendMessageTask(message, googleApiClient)
+            .execute();/**/
+    }
 }
-```
 
-2. Call ```.connect()``` method
-
-You can put this call in the your activity ```onStart()``` method
-
-```java
-   googleApiClient.connect();
-```
-
-2. Wait ```onConnected()``` to be called
-
-At this point, the device is ready to _talk_ with android wear devices if all went well, otherwhise the ```onConnectionFailedListener``` would be fired.
-
-
-
-```java
-private final ConnectionCallbacks gConnectionCallbacks = new ConnectionCallbacks() {
-    @Override
-    public void onConnected(Bundle bundle) {
-
-       // Subscribe wear listeners
-       Wearable.MessageApi.addListener(googleApiClient, wearMessageListener);
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-        [...]
-    }
-};
 ```
 
 Now there are available the communication APIs that google provide us, there are 3 APIs wich can be used: [MessageApi](http://developer.android.com/reference/com/google/android/gms/wearable/MessageApi.html), [NodeApi](https://developer.android.com/reference/com/google/android/gms/wearable/NodeApi.html) & [DataApi](http://developer.android.com/reference/com/google/android/gms/wearable/DataApi.html).
@@ -150,8 +232,6 @@ private final MessageApi.MessageListener wearMessageListener = new MessageApi.Me
     public void onMessageReceived(MessageEvent messageEvent) {
 
         String msg = messageEvent.getPath();
-        Log.d("[DEBUG] WearService - onMessageReceived", "Message received: " + msg);
-        								
         [...]
     }
 }

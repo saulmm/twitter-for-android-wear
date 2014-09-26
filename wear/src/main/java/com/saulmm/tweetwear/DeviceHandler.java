@@ -42,18 +42,7 @@ public class DeviceHandler implements ConnectionCallbacks, OnConnectionFailedLis
     private ActionListener onRetweetListener;
     private WearTwitterServiceListener deviceListener;
 
-    private final static String MSG_LOAD_LAST_TIMELINE = "/tweets/timeline";
-    private final static String MSG_RETWEET            = "/tweets/retweet/";
-    private final static String MSG_FAVORITE           = "/tweets/favorite/";
-    private final static String MSG_SALUDATE           = "/tweets/hi/";
 
-
-
-
-    /**
-     * Singleton pattern
-     * @return an instance of DeviceService
-     */
     public static DeviceHandler getInstance () {
 
         if (instance == null) {
@@ -163,37 +152,35 @@ public class DeviceHandler implements ConnectionCallbacks, OnConnectionFailedLis
     @Override
     public void onMessageReceived(MessageEvent messageEvent) {
 
-        Log.d ("[DEBUG] DeviceService - onMessageReceived",
-            "Message received "+messageEvent.getPath());
-
         String messagePath = messageEvent.getPath();
 
-        if (messagePath.equals("/tweets/operation/ok")) {
+        // Message: /tweets/operation/ok
+        if (messagePath.equals(Constants.MSG_OP_OK)) {
             onRetweetListener.onActionOK();
         }
 
-        if (messagePath.equals("/tweets/operation/fail")) {
+        // Message: /tweets/operation/fail
+        if (messagePath.equals(Constants.MSG_OP_FAIL)) {
             onRetweetListener.onActionFail();
         }
 
-        if (messagePath.equals("/tweets/state/no_internet")) {
+        // Message: /tweets/state/no_internet
+        if (messagePath.equals(Constants.MSG_NO_ITERNET)) {
             deviceListener.onProblem(messagePath);
         }
 
-        if (messagePath.equals("/tweets/state/no_login")) {
+        // Message: /tweets/state/no_login
+        if (messagePath.equals(Constants.MSG_NO_LOGIN)) {
             deviceListener.onProblem(messagePath);
         }
 
+        // Message: /tweets/state/available
         if (messagePath.equals("/tweets/state/available")) {
             isTwitterServiceIsRunning = true;
         }
-
     }
 
 
-    /**
-     * AsyncTask to send messages to the devices
-     */
     class SendMessageTask extends AsyncTask <Void, Void, Void> {
 
         private final String message;
@@ -225,9 +212,7 @@ public class DeviceHandler implements ConnectionCallbacks, OnConnectionFailedLis
         }
     }
 
-    /**
-     *  AsyncTask to get connected devices to the wearable
-     */
+
     class GetNodesTasks extends AsyncTask <Void, Void, Void> {
         @Override
         protected Void doInBackground(Void... params) {
@@ -245,10 +230,7 @@ public class DeviceHandler implements ConnectionCallbacks, OnConnectionFailedLis
 
             super.onPostExecute(aVoid);
 
-            Log.d ("[DEBUG] GetNodesTasks - onPostExecute",
-                "Nodes tasks end, isConnected: "+isConnected);
-
-            new SendMessageTask (MSG_SALUDATE).execute();
+            new SendMessageTask (Constants.MSG_SALUDATE).execute();
 
             // Wait 3 seconds to see if the wear service is running
             new Handler().postDelayed(new Runnable() {
@@ -271,17 +253,17 @@ public class DeviceHandler implements ConnectionCallbacks, OnConnectionFailedLis
 
 
     public void requestTwitterTimeline () {
-        new SendMessageTask(MSG_LOAD_LAST_TIMELINE).execute();
+        new SendMessageTask(Constants.TIME_LINE_DATA).execute();
     }
 
 
     public void requestAction(TwitterAction twAction, String tweetID) {
 
         if (twAction == TwitterAction.RETWEET) {
-            new SendMessageTask(MSG_RETWEET + tweetID).execute();
+            new SendMessageTask(Constants.MSG_RETWEET + tweetID).execute();
 
         } else if (twAction == TwitterAction.FAVORITE) {
-            new SendMessageTask(MSG_FAVORITE + tweetID).execute();
+            new SendMessageTask(Constants.MSG_FAVORITE + tweetID).execute();
         }
     }
     
@@ -303,6 +285,4 @@ public class DeviceHandler implements ConnectionCallbacks, OnConnectionFailedLis
             isConnected = false;
         }
     };
-            
-
 }

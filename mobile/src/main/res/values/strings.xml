@@ -4,5 +4,8 @@
     <string name="app_name">Twitter on Wear</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="flogin_button">Sign in with twitter</string>
+    <string name="fuser_logged_text">You are logged in as...</string>
+    <string name="fuser_profile_description">Your image profile</string>
 
 </resources>

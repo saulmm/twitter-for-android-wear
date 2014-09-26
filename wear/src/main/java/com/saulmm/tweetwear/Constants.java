@@ -7,16 +7,21 @@ package com.saulmm.tweetwear;
  */
 public class Constants {
 
-    private final static String TWEET_SEPARATOR         = "_--__";
+    public final static String TWEET_SEPARATOR          = "_--__";
+    public static final String TWEETS_KEY               = "tweets";
+
+    public static final int TWEET_FRAGMENT              = 0;
+    public static final int RETWEET_FRAGMENT            = 1;
+    public static final int FAVORITE_FRAGMENT           = 2;
 
     // Wear Messages
-    private final static String TIME_LINE_DATA          = "/twitter/timeline";
-    private final static String MSG_LOAD_LAST_TIMELINE  = "/tweets/timeline";
-    private final static String MSG_RETWEET             = "/tweets/retweet/";
-    private final static String MSG_FAVORITE            = "/tweets/favorite/";
-    private final static String MSG_RETWEET_OK          = "/tweets/operation/ok";
-    private final static String MSG_RETWEET_FAIL        = "/tweets/operation/fail";
-    private final static String MSG_NO_ITERNET          = "/tweets/state/no_internet";
-    private final static String MSG_AVAILABLE           = "/tweets/state/available";
-    private final static String MSG_SALUDATE            = "/tweets/hi/";
+    public final static String TIME_LINE_DATA          = "/tweets/timeline";
+    public final static String MSG_RETWEET             = "/tweets/retweet/";
+    public final static String MSG_FAVORITE            = "/tweets/favorite/";
+    public final static String MSG_OP_OK               = "/tweets/operation/ok";
+    public final static String MSG_OP_FAIL             = "/tweets/operation/fail";
+    public final static String MSG_NO_LOGIN            = "/tweets/state/no_login";
+    public final static String MSG_NO_ITERNET          = "/tweets/state/no_internet";
+    public final static String MSG_AVAILABLE           = "/tweets/state/available";
+    public final static String MSG_SALUDATE            = "/tweets/hi/";
 }

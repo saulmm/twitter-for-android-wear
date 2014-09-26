@@ -55,7 +55,7 @@
                 android:layout_gravity="center|center_vertical"
                 android:textColor="@color/white"
                 android:textSize="18sp"
-                android:text="Sign in with twitter"
+                android:text="@string/flogin_button"
 
                 fbutton:cornerRadius="15dp"
                 fbutton:shadowEnabled="true"

@@ -117,7 +117,7 @@ public class WearHandler extends WearableListenerService  {
 
     public void sendMessageToWearable (String message) {
 
-        new SendMessageTask(message, googleApiClient, connectedNode)
-            .execute();
+        new SendMessageTask(message, googleApiClient)
+            .execute();/**/
     }
 }

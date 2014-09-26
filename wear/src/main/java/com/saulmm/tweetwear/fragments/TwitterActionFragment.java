@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,28 +18,28 @@ import com.saulmm.tweetwear.R;
 import com.saulmm.tweetwear.data.Tweet;
 import com.saulmm.tweetwear.enums.TwitterAction;
 import com.saulmm.tweetwear.listeners.ActionListener;
-import com.saulmm.tweetwear.listeners.PagerListener;
 
 @SuppressLint("ValidFragment")
 public class TwitterActionFragment extends Fragment implements View.OnClickListener {
 
-    private Tweet currentTweet;
     private TwitterAction twAction;
-
+    private DeviceHandler handler;
     private TextView actionText;
+
+    private Tweet currentTweet;
     private ImageButton actionImg;
     private AnimationSet setAnimMeaningOn;
-    private DeviceHandler handler;
-    private PagerListener pagerListener;
 
 
     public void setTwAction(TwitterAction twAction) {
         this.twAction = twAction;
     }
 
+
     public void setCurrentTweet(Tweet currentTweet) {
         this.currentTweet = currentTweet;
     }
+
 
     @Nullable
     @Override
@@ -62,9 +61,7 @@ public class TwitterActionFragment extends Fragment implements View.OnClickListe
         return rootView;
     }
 
-    /**
-     * Configure the action depending if there is a Retweet or a Favorite action
-     */
+
     private void configureAction() {
 
         switch (twAction) {
@@ -97,16 +94,12 @@ public class TwitterActionFragment extends Fragment implements View.OnClickListe
         handler.setOnActionListener (actionListener);
     }
 
+
     @Override
     public void onClick(View v) {
+
         actionImg.startAnimation(setAnimMeaningOn);
-
-        if (handler.isConnected())
-            handler.requestAction(twAction, currentTweet.getId());
-
-        else {
-            Log.d("[DEBUG] TwitterActionFragment - onClick", "Cannot retweet, not connected");
-        }
+        handler.requestAction(twAction, currentTweet.getId());
     }
 
 
@@ -114,38 +107,28 @@ public class TwitterActionFragment extends Fragment implements View.OnClickListe
         @Override
         public void onActionOK () {
 
-            final String action = (twAction == TwitterAction.RETWEET) ? "Retweet" : "Favorite";
-
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(getActivity(), action + " successful !", Toast.LENGTH_SHORT).show();
+
                     actionImg.clearAnimation();
+                    Toast.makeText(getActivity(), "Successful !", Toast.LENGTH_SHORT)
+                        .show();
                 }
             });
-
         }
 
         @Override
         public void onActionFail () {
 
-            final String action = (twAction == TwitterAction.RETWEET) ? "Retweet" : "Favorite";
-
             getActivity().runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    Toast.makeText(getActivity(), action + " failed :(", Toast.LENGTH_SHORT).show();
+
                     actionImg.clearAnimation();
+                    Toast.makeText(getActivity(), "Failed :(", Toast.LENGTH_SHORT).show();
                 }
             });
         }
     };
-
-    public void setPagerListener(PagerListener pagerListener) {
-        this.pagerListener = pagerListener;
-    }
-
-    public PagerListener getPagerListener() {
-        return pagerListener;
-    }
 }

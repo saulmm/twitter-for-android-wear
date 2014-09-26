@@ -12,6 +12,7 @@ import com.saulmm.tweetwear.Constants;
 import com.saulmm.tweetwear.Utils;
 
 import java.util.ArrayList;
+import java.util.regex.PatternSyntaxException;
 
 import twitter4j.Status;
 import twitter4j.Twitter;
@@ -26,7 +27,6 @@ import twitter4j.auth.RequestToken;
 public class TwitterHelper {
 
     private boolean userLogged;
-    private Context context;
     private SharedPreferences preferences;
 
     // Twitter listeners
@@ -171,10 +171,18 @@ public class TwitterHelper {
 
                 for (twitter4j.Status ts : statuses) {
 
-                    String twUsername = ts.getUser().getName();
-                    String twText = Utils.removeUrl(ts.getText());
-                    String twTime = Utils.getTimeDiference(ts.getCreatedAt());
                     long tweetID = ts.getId();
+                    String twText;
+                    String twTime = Utils.getTimeDiference(ts.getCreatedAt());
+                    String twUsername = ts.getUser().getName();
+
+                    try {
+
+                        twText = Utils.removeUrl(ts.getText());
+
+                    } catch (PatternSyntaxException e) {
+                         twText = ts.getText();
+                    }
 
                     boolean isRTbyMe = ts.isRetweetedByMe();
                     boolean isFVbyMe = ts.isFavorited();

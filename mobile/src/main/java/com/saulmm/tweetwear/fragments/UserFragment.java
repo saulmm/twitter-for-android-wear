@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.wearable.Node;
@@ -26,10 +25,6 @@ public class UserFragment extends Fragment
 
     private SharedPreferences preferences;
 
-    // Service
-    private LinearLayout hintHolderLn;
-    private ImageView hintIconImg;
-    private TextView hintTv;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -50,10 +45,6 @@ public class UserFragment extends Fragment
         Button revokeButton         = (Button) rootView.findViewById (R.id.tw_user_revoke);
         ImageView profileImg        = (ImageView) rootView.findViewById (R.id.tw_profile_img);
         ImageView userBackground    = (ImageView) rootView.findViewById (R.id.tw_user_background);
-
-        hintTv                      = (TextView) rootView.findViewById (R.id.tw_hint_text);
-        hintIconImg                 = (ImageView) rootView.findViewById (R.id.tw_hint_icon);
-        hintHolderLn                = (LinearLayout) rootView.findViewById (R.id.tw_hint_holder);
 
         Picasso.with(getActivity())
             .load(preferences.getString("IMAGE_URL", ""))
