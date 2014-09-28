@@ -53,7 +53,7 @@
                 android:layout_width="200dp"
                 android:layout_height="64dp"
                 android:layout_gravity="center|center_vertical"
-                android:textColor="@color/white"
+                android:textColor="#FFF"
                 android:textSize="18sp"
                 android:text="@string/flogin_button"
 
