@@ -44,7 +44,7 @@ public class TwitterActionFragment extends Fragment implements View.OnClickListe
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.twitter_action_fragment, null);
+        View rootView = inflater.inflate(R.layout.fragment_action   , null);
 
         handler = DeviceHandler.getInstance();
 
