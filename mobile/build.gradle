@@ -8,8 +8,8 @@ android {
         applicationId "com.saulmm.tweetwear"
         minSdkVersion 18
         targetSdkVersion 20
-        versionCode 1
-        versionName "1.0"
+        versionCode 3
+        versionName "1.1"
     }
     buildTypes {
         release {
@@ -25,7 +25,6 @@ dependencies {
     compile 'com.google.android.gms:play-services-wearable:+'
     compile 'info.hoang8f:fbutton:1.0.5'
     compile 'com.squareup.picasso:picasso:2.3.3'
-    compile 'com.github.dmytrodanylyk.circular-progress-button:library:1.1.0'
     compile files('libs/twitter4j-core-4.0.2.jar')
     compile 'de.hdodenhof:circleimageview:1.2.0'
 
