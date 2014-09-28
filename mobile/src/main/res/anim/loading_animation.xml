@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<set xmlns:android="http://schemas.android.com/apk/res/android"
+    android:fillAfter="true"
+    android:fillEnabled="true"
+
+    android:shareInterpolator="false" >
+
+    <rotate
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:duration="1000"
+        android:repeatCount="infinite"
+        android:fromDegrees="0"
+        android:interpolator="@android:anim/anticipate_overshoot_interpolator"
+        android:pivotX="50%"
+        android:pivotY="50%"
+        android:toDegrees="359" />
+</set>

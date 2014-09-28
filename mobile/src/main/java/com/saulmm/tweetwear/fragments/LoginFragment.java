@@ -3,7 +3,6 @@ package com.saulmm.tweetwear.fragments;
 import android.app.Dialog;
 import android.app.Fragment;
 import android.app.FragmentTransaction;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
@@ -15,9 +14,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.animation.AnimationUtils;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.saulmm.tweetwear.R;
@@ -33,9 +34,10 @@ public class LoginFragment extends Fragment implements TwitterLoginListener {
 
     // UI Stuff
     private Dialog authDialog;
+    private Dialog waitDialog;
+
     private TextView errorMessageTv;
     private Button twitterLoginFragmentButton;
-    private ProgressDialog pDialog;
 
     private Context ctx;
 
@@ -65,10 +67,13 @@ public class LoginFragment extends Fragment implements TwitterLoginListener {
 
     private View initUI(LayoutInflater inflater) {
 
-        pDialog = new ProgressDialog(getActivity());
-        pDialog.setMessage("Sign in with twitter...\nPlease wait");
-        pDialog.setIndeterminate(true);
-        pDialog.setCancelable(false);
+        waitDialog = new Dialog(getActivity());
+        waitDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        waitDialog.setContentView(R.layout.dialog_wait);
+        waitDialog.setCancelable(false);
+
+        ImageView loadingSegment = (ImageView) waitDialog.findViewById(R.id.d_loading_img);
+        loadingSegment.startAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.loading_animation));
 
         View rootView = inflater.inflate(R.layout.fragment_login, null); // TODO Check this
 
@@ -86,7 +91,7 @@ public class LoginFragment extends Fragment implements TwitterLoginListener {
         public void onClick(View v) {
 
         errorMessageTv.setText("");
-        pDialog.show();
+        waitDialog.show();
 
         twHelper.setLoginListener(LoginFragment.this);
         twHelper.requestAuthorizationUrl();
@@ -104,7 +109,7 @@ public class LoginFragment extends Fragment implements TwitterLoginListener {
             if (url.startsWith("http://saulmm.com/")) {
                 authDialog.dismiss();
                 authOk = true;
-                pDialog.show();
+                waitDialog.show();
             }
         }
 
@@ -138,7 +143,7 @@ public class LoginFragment extends Fragment implements TwitterLoginListener {
 
                 // Reinitialize the twitter client
                 twHelper.initTwitter();
-                pDialog.dismiss();
+                waitDialog.dismiss();
                 String errorMsg = "You must be logged in to use twitter in android wear"; // TODO Hardcoded string
                 showButtonError(errorMsg);
             }
@@ -201,7 +206,7 @@ public class LoginFragment extends Fragment implements TwitterLoginListener {
 
         authOk = true;
         twitterLoginFragmentButton.setEnabled(false);
-        pDialog.dismiss();
+        waitDialog.dismiss();
 
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.content_frame, new UserFragment());
