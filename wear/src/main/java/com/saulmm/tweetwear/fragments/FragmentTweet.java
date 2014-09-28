@@ -17,45 +17,52 @@ import com.saulmm.tweetwear.data.Tweet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class TweetFragment extends Fragment {
+public class FragmentTweet extends Fragment {
     private static final Pattern MENTION_PATTERN = Pattern.compile("@(\\w+)");
     private static final Pattern HASHTAG_PATTERN = Pattern.compile("(#\\w+)");
 
 
     private Tweet cardTweet;
+    private int row;
 
-    public TweetFragment () {}
 
     public void setCardTweet(Tweet cardTweet) {
         this.cardTweet = cardTweet;
     }
 
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.tweet_fragment, null);
+        View rootView = null;
+        TextView name, tweet, time;
 
-        TextView name = (TextView) rootView.findViewById(R.id.tf_name);
-        TextView tweet = (TextView) rootView.findViewById(R.id.tf_tweet);
-        TextView time = (TextView) rootView.findViewById(R.id.tf_time);
+        if (cardTweet.getTweet().length() >= 100) {
 
-        if (cardTweet.getTweet().length() >= 120) {
+            rootView = inflater.inflate(R.layout.activity_full, null);
+            name = (TextView) rootView.findViewById(R.id.tf_name_full);
+            tweet = (TextView) rootView.findViewById(R.id.tf_tweet_full);
+            time = (TextView) rootView.findViewById(R.id.tf_time_full);
 
-            tweet.setTextSize(tweet.getTextSize() - 10);
-            name.setTextSize(name.getTextSize() - 10);
+        } else {
+
+            rootView = inflater.inflate(R.layout.fragment_tweet, null);
+            name = (TextView) rootView.findViewById(R.id.tf_name);
+            tweet = (TextView) rootView.findViewById(R.id.tf_tweet);
+            time = (TextView) rootView.findViewById(R.id.tf_time);
         }
 
         SpannableString spannableContent = new SpannableString (
             cardTweet.getTweet());
 
         Matcher mentionMatcher  = MENTION_PATTERN.matcher(cardTweet.getTweet());
-        setPatternSpan (mentionMatcher, spannableContent);
-
         Matcher hashtagMatcher = HASHTAG_PATTERN.matcher(cardTweet.getTweet());
+
+        setPatternSpan (mentionMatcher, spannableContent);
         setPatternSpan(hashtagMatcher, spannableContent);
 
-        name.setText(cardTweet.getName());
         tweet.setText(spannableContent);
+        name.setText(cardTweet.getName());
         time.setText(cardTweet.getTime());
 
         return rootView;
@@ -69,5 +76,13 @@ public class TweetFragment extends Fragment {
             spString.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.wall_color)),
                 matcher.start(), matcher.end(),Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
         }
+    }
+
+    public void setRow(int row) {
+        this.row = row;
+    }
+
+    public int getRow() {
+        return row;
     }
 }

@@ -5,5 +5,5 @@ package com.saulmm.tweetwear.listeners;
  */
 public interface PagerListener {
 
-    public void onChangePage ();
+    public void onBigTweetRequested();
 }

@@ -59,13 +59,6 @@ public class DeviceHandler implements ConnectionCallbacks, OnConnectionFailedLis
     }
 
 
-    private DeviceHandler() {
-
-        Log.d ("[DEBUG] DeviceService - DeviceService",
-            "Starting handFel manager: isConnected: "+isConnected);
-    }
-
-
     public void setDeviceListener(WearTwitterServiceListener deviceListener) {
 
         this.deviceListener = deviceListener;

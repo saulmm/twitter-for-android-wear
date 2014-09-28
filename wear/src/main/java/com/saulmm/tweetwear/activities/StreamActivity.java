@@ -11,7 +11,7 @@ import com.saulmm.tweetwear.Constants;
 import com.saulmm.tweetwear.R;
 import com.saulmm.tweetwear.data.Tweet;
 import com.saulmm.tweetwear.enums.TwitterAction;
-import com.saulmm.tweetwear.fragments.TweetFragment;
+import com.saulmm.tweetwear.fragments.FragmentTweet;
 import com.saulmm.tweetwear.fragments.TwitterActionFragment;
 
 import java.util.ArrayList;
@@ -20,7 +20,6 @@ import java.util.ArrayList;
 public class StreamActivity extends Activity {
 
     private ArrayList <Tweet> visibleTweets;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,8 +64,9 @@ public class StreamActivity extends Activity {
 
     private void initUI() {
 
-        setContentView(R.layout.stream_activity);
+        setContentView(R.layout.activity_stream);
         GridViewPager streamPager = (GridViewPager) findViewById(R.id.stream_pager);
+
         streamPager.setAdapter(new TwitterAdapter(getFragmentManager(),
                 visibleTweets));
     }
@@ -82,6 +82,8 @@ public class StreamActivity extends Activity {
     class TwitterAdapter extends FragmentGridPagerAdapter {
 
         private ArrayList<Tweet> tweets;
+        private FragmentTweet tf;
+
 
         public TwitterAdapter(FragmentManager fm, ArrayList<Tweet> tweets) {
 
@@ -98,8 +100,9 @@ public class StreamActivity extends Activity {
 
             if (column == Constants.TWEET_FRAGMENT) {
 
-                TweetFragment tf = new TweetFragment();
+                tf = new FragmentTweet();
                 tf.setCardTweet(currentTweet);
+                tf.setRow(row);
                 return tf;
 
             } else if (column == Constants.RETWEET_FRAGMENT) {
