@@ -8,7 +8,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.saulmm.tweetwear.Constants;
 import com.saulmm.tweetwear.R;
@@ -20,9 +19,6 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        // TODO Debug
-        printWelcomeMessage ();
 
         setContentView(R.layout.activity_main);
 
@@ -50,12 +46,4 @@ public class MainActivity extends Activity {
         ft.addToBackStack(null);
         ft.commit();
     }
-
-    private void printWelcomeMessage() {
-        Log.d ("[DEBUG] MainActivity - printWelcomeMessage", "\n\n\n [INFO][DEBUG][ERROR] Last release\n [INFO][DEBUG][ERROR] \n [INFO][DEBUG][ERROR] \n [INFO][DEBUG][ERROR] \n [INFO][DEBUG][ERROR] New run \n [INFO][DEBUG][ERROR] \n [INFO][DEBUG][ERROR] \n [INFO][DEBUG][ERROR]\n\n\n");
-        
-    }
-
-
-
 }
