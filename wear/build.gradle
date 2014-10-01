@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 
-
 android {
     compileSdkVersion 20
     buildToolsVersion "20.0.0"
@@ -9,7 +8,7 @@ android {
         applicationId "com.saulmm.tweetwear"
         minSdkVersion 20
         targetSdkVersion 20
-        versionCode 3
+        versionCode 4
         versionName "1.1"
     }
     buildTypes {

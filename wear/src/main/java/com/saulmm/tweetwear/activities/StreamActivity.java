@@ -64,6 +64,8 @@ public class StreamActivity extends Activity {
 
     private void initUI() {
 
+
+
         setContentView(R.layout.activity_stream);
         GridViewPager streamPager = (GridViewPager) findViewById(R.id.stream_pager);
 

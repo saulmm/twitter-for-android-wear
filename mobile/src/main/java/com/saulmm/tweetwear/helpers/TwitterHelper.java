@@ -14,6 +14,7 @@ import com.saulmm.tweetwear.Utils;
 import java.util.ArrayList;
 import java.util.regex.PatternSyntaxException;
 
+import twitter4j.Paging;
 import twitter4j.Status;
 import twitter4j.Twitter;
 import twitter4j.TwitterException;
@@ -148,6 +149,7 @@ public class TwitterHelper {
                     "Getting the timeline");
 
             try {
+
                 statuses = (ArrayList<twitter4j.Status>) twClient.getHomeTimeline();
                 return statuses;
 

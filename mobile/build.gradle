@@ -8,7 +8,7 @@ android {
         applicationId "com.saulmm.tweetwear"
         minSdkVersion 18
         targetSdkVersion 20
-        versionCode 3
+        versionCode 4
         versionName "1.1"
     }
     buildTypes {
@@ -27,5 +27,4 @@ dependencies {
     compile 'com.squareup.picasso:picasso:2.3.3'
     compile files('libs/twitter4j-core-4.0.2.jar')
     compile 'de.hdodenhof:circleimageview:1.2.0'
-
 }

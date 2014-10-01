@@ -1,12 +1,10 @@
-<?xml version="1.0" encoding="utf-8"?>
-
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
 
     android:orientation="vertical" android:layout_width="match_parent"
     android:background="#DDFFFFFF"
-    android:padding="2dp"
+    android:padding="15dp"
     android:layout_height="match_parent">
 
     <LinearLayout
@@ -18,17 +16,21 @@
         >
 
         <LinearLayout
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="5dp"
+            android:layout_marginBottom="5dp"
             android:orientation="horizontal"
             >
 
             <TextView
-                android:id="@+id/tf_name_full"
-                android:layout_width="0dp"
+                android:id="@+id/tf_name"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:textSize="17sp"
+                android:gravity="center"
+                android:layout_gravity="center_vertical"
                 android:textColor="@color/wall_color"
                 android:maxLines="1"
                 android:fontFamily="sans-serif-condensed"
@@ -37,9 +39,11 @@
                 />
 
             <TextView
-                android:id="@+id/tf_time_full"
-                android:layout_marginLeft="2dp"
+                android:id="@+id/tf_time"
+                android:layout_marginLeft="5dp"
                 android:layout_marginRight="2dp"
+
+                android:layout_gravity="center_vertical"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#ff6d6d6d"
@@ -54,16 +58,17 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/tf_tweet_full"
+            android:id="@+id/tf_tweet"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:textSize="17sp"
+            android:textSize="15sp"
             android:textColor="#000"
             android:textColorLink="@color/wall_color"
             android:lineSpacingExtra="3dp"
             android:fontFamily="sans-serif-light"
             android:clickable="false"
+            android:gravity="center"
             android:layout_marginBottom="5dp"
 
             android:text="Berlin-based photo-sharing platform EyeEm has acquired a computer vision startup called Sight.io tcrn.ch/large tweet, yes it is, ya"
