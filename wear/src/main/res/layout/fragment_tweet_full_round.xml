@@ -12,6 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="5dp"
+        android:layout_gravity="center"
         android:orientation="vertical"
         >
 
@@ -28,7 +29,7 @@
                 android:id="@+id/tf_name"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="17sp"
+                android:textSize="15sp"
                 android:gravity="center"
                 android:layout_gravity="center_vertical"
                 android:textColor="@color/wall_color"
@@ -40,14 +41,14 @@
 
             <TextView
                 android:id="@+id/tf_time"
-                android:layout_marginLeft="5dp"
+                android:layout_marginLeft="7dp"
                 android:layout_marginRight="2dp"
 
-                android:layout_gravity="center_vertical"
+                android:layout_gravity="center"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:textColor="#ff6d6d6d"
-                android:textSize="12sp"
+                android:textSize="11sp"
                 android:fontFamily="sans-serif-light"
                 android:maxLines="1"
                 android:gravity="center"
@@ -62,7 +63,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="5dp"
-            android:textSize="15sp"
+            android:textSize="14sp"
             android:textColor="#000"
             android:textColorLink="@color/wall_color"
             android:lineSpacingExtra="3dp"

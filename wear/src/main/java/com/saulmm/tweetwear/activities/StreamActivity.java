@@ -64,11 +64,9 @@ public class StreamActivity extends Activity {
 
     private void initUI() {
 
-
-
         setContentView(R.layout.activity_stream);
-        GridViewPager streamPager = (GridViewPager) findViewById(R.id.stream_pager);
 
+        GridViewPager streamPager = (GridViewPager) findViewById(R.id.stream_pager);
         streamPager.setAdapter(new TwitterAdapter(getFragmentManager(),
                 visibleTweets));
     }

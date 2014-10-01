@@ -1,9 +1,12 @@
 package com.saulmm.tweetwear.activities;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.drawable.TransitionDrawable;
 import android.os.Bundle;
+import android.support.wearable.view.WatchViewStub;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.AnimationUtils;
@@ -42,12 +45,30 @@ public class WaitActivity extends Activity implements WearTwitterServiceListener
     private void initUI() {
         setContentView(R.layout.activity_wait);
 
-        stateMessageTV  = (TextView) findViewById (R.id.loading_textview);
-        loadingFL       = (FrameLayout) findViewById (R.id.loading_frame);
-        loadingSegment  = (ImageView) findViewById(R.id.loading_segment);
-
-        loadingSegment.startAnimation(AnimationUtils.loadAnimation(this, R.anim.loading_animation));
+        WatchViewStub stub = (WatchViewStub) findViewById(R.id.stream_stub);
+        stub.setOnLayoutInflatedListener(layoutInflatedListener);
     }
+
+    private WatchViewStub.OnLayoutInflatedListener layoutInflatedListener = new WatchViewStub.OnLayoutInflatedListener() {
+
+        @Override
+        public void onLayoutInflated(WatchViewStub watchViewStub) {
+
+            stateMessageTV  = (TextView) findViewById (R.id.loading_textview);
+            loadingFL       = (FrameLayout) findViewById (R.id.loading_frame);
+            loadingSegment  = (ImageView) findViewById(R.id.loading_segment);
+
+            loadingSegment.startAnimation(AnimationUtils.loadAnimation(WaitActivity.this, R.anim.loading_animation));
+
+            View worAroundView = watchViewStub.findViewById(R.id.workaround_id);
+
+            SharedPreferences settings = getSharedPreferences("Wear_Prefs", Context.MODE_PRIVATE);
+            SharedPreferences.Editor edit = settings.edit();
+
+            edit.putBoolean("isRound", worAroundView != null);
+            edit.apply();
+        }
+    };
 
 
     @Override

@@ -1,13 +1,14 @@
 package com.saulmm.tweetwear.fragments;
 
 import android.app.Fragment;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.wearable.view.WatchViewStub;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,44 +38,55 @@ public class FragmentTweet extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
 
-        int fullTweetLayout = (cardTweet.getTweet().length() >= 100)
-            ? R.layout.fragment_tweet_full
-            : R.layout.fragment_tweet;
+        SharedPreferences settings = getActivity().getSharedPreferences("Wear_Prefs",
+            Context.MODE_PRIVATE);
 
-        Log.d ("[DEBUG] FragmentTweet - onCreateView", "R.layout.fragment_tweet_full: "+R.layout.fragment_tweet_full);
-        Log.d ("[DEBUG] FragmentTweet - onCreateView", "R.layout.fragment_tweet: "+R.layout.fragment_tweet);
+        boolean isRound = settings.getBoolean("isRound", false);
 
+        int fullTweetLayout = (isRound)
+            ? R.layout.fragment_tweet_round
+            : R.layout.fragment_tweet_rect;
 
-        WatchViewStub watchView = (WatchViewStub) inflater.inflate(fullTweetLayout, null);
-        watchView.setOnLayoutInflatedListener(layoutInflatedListener);
+        if (cardTweet.getTweet().length() >= 100) {
 
-        return watchView;
+            fullTweetLayout = (isRound)
+                ? R.layout.fragment_tweet_full_round
+                : R.layout.fragment_tweet_full_rect;
+        }
+
+        View rootView = inflater.inflate(fullTweetLayout, null);
+
+        initUI (rootView);
+
+        return rootView;
+    }
+
+    private void initUI(View rootView) {
+        TextView name, tweet, time;
+
+        name = (TextView) rootView.findViewById(R.id.tf_name);
+        tweet = (TextView) rootView.findViewById(R.id.tf_tweet);
+        time = (TextView) rootView.findViewById(R.id.tf_time);
+
+        SpannableString spannableContent = new SpannableString (
+                cardTweet.getTweet());
+
+        Matcher mentionMatcher  = MENTION_PATTERN.matcher(cardTweet.getTweet());
+        Matcher hashtagMatcher = HASHTAG_PATTERN.matcher(cardTweet.getTweet());
+
+        setPatternSpan (mentionMatcher, spannableContent);
+        setPatternSpan(hashtagMatcher, spannableContent);
+
+        tweet.setText(spannableContent);
+        name.setText(cardTweet.getName());
+        time.setText(cardTweet.getTime());
+
     }
 
     WatchViewStub.OnLayoutInflatedListener layoutInflatedListener = new WatchViewStub.OnLayoutInflatedListener() {
         @Override
         public void onLayoutInflated(WatchViewStub watchViewStub) {
-            TextView name, tweet, time;
 
-            name = (TextView) watchViewStub.findViewById(R.id.tf_name);
-            tweet = (TextView) watchViewStub.findViewById(R.id.tf_tweet);
-            time = (TextView) watchViewStub.findViewById(R.id.tf_time);
-
-            SpannableString spannableContent = new SpannableString (
-                    cardTweet.getTweet());
-
-            Log.d("[DEBUG] FragmentTweet - onLayoutInflated", "Hi all !!!");
-            
-            
-            Matcher mentionMatcher  = MENTION_PATTERN.matcher(cardTweet.getTweet());
-            Matcher hashtagMatcher = HASHTAG_PATTERN.matcher(cardTweet.getTweet());
-
-            setPatternSpan (mentionMatcher, spannableContent);
-            setPatternSpan(hashtagMatcher, spannableContent);
-
-            tweet.setText(spannableContent);
-            name.setText(cardTweet.getName());
-            time.setText(cardTweet.getTime());
         }
     };
 

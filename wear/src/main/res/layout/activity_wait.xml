@@ -1,31 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical"
+<android.support.wearable.view.WatchViewStub
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/stream_stub"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:id="@+id/loading_frame"
-    android:background="@drawable/tr_error"
+    app:rectLayout="@layout/activity_wait_rect"
+    app:roundLayout="@layout/activity_wait_round"
     android:keepScreenOn="true"
-    >
-
-    <TextView
-        android:id="@+id/loading_textview"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Loading\ntweets"
-        android:textColor="#FFF"
-        android:fontFamily="sans-serif-thin"
-        android:textSize="30sp"
-        android:lines="3"
-        android:gravity="center"
-        />
-
-    <ImageView
-        android:id="@+id/loading_segment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src="@drawable/loading"/>
-</FrameLayout>
-
-
+    tools:context=".MyActivity"
+    tools:deviceIds="wear">
+</android.support.wearable.view.WatchViewStub>
